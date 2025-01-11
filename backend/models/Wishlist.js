@@ -8,10 +8,10 @@ const wishlistSchema = new mongoose.Schema({
             ref: 'Product',
             required: true
         },
-        quantity: {
+        price: {
             type: Number,
-            required: true,
-            min: 1
+            min: 1,
+            required: true
         }
     }],
     totalNoOfProducts: {

@@ -5,6 +5,7 @@ const jwt = require('jsonwebtoken');
 const User = require("../models/User");
 const {authenticateToken, logout} = require("../middleware/Auth");
 const cartRoutes = require('../routes/Cart');
+const wishlistRoutes = require('../routes/Wishlist');
 
 //Route for registering user
 router.post('/register', async (req,res)=>{
@@ -86,5 +87,8 @@ router.patch('/password-update', async (req,res)=>{
 
 //Route for handling cart routes
 router.use('/cart', cartRoutes);
+
+//Route for handling wishlist routes
+router.use('/wishlist', wishlistRoutes);
 
 module.exports = router;
