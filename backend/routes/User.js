@@ -4,6 +4,7 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require("../models/User");
 const {authenticateToken, logout} = require("../middleware/Auth");
+const cartRoutes = require('../routes/Cart');
 
 //Route for registering user
 router.post('/register', async (req,res)=>{
@@ -34,10 +35,13 @@ router.post('/login', async (req,res)=>{
     catch(err){
         res.status(500).send("Server error: "+ err.message);
     }
-})
+});
+
+// Apply token authentication middleware to all /users routes
+router.use(authenticateToken);
 
 //Route for getting profile (protected)
-router.get('/profile', authenticateToken, (req,res)=>{
+router.get('/profile', (req,res)=>{
     res.json({user: req.user});
 })
 
@@ -45,7 +49,7 @@ router.get('/profile', authenticateToken, (req,res)=>{
 router.post('/logout', logout);
 
 //Route for profile updation
-router.patch('/profile-update', authenticateToken, async (req,res)=>{
+router.patch('/profile-update', async (req,res)=>{
     const {newUserName} = req.body;
     try{
         const userExist = await User.find({userName: newUserName});
@@ -63,11 +67,11 @@ router.patch('/profile-update', authenticateToken, async (req,res)=>{
 });
 
 //Route for password updation
-router.patch('/password-update', authenticateToken, async (req,res)=>{
+router.patch('/password-update', async (req,res)=>{
     const newPassword = req.body.password;
     try{
         const userInfo = await User.findById(req.user.id);
-        const isMatch = await bcrypt.compare(userInfo.password, newPassword);
+        const isMatch = await bcrypt.compare(newPassword, userInfo.password);
 
         if(isMatch) return res.status(400).send("New password is same as old password.");
         const newHashedPassword = await bcrypt.hash(newPassword, 10);
@@ -79,5 +83,8 @@ router.patch('/password-update', authenticateToken, async (req,res)=>{
         res.status(500).send("Server error: "+err);
     }
 });
+
+//Route for handling cart routes
+router.use('/cart', cartRoutes);
 
 module.exports = router;
