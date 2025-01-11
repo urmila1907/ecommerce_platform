@@ -43,7 +43,7 @@ router.post('/', asyncHandler(async (req,res)=>{
         const newCartExistingProduct = await Cart.findOneAndUpdate({customer : userId, 'products.product': product},
             {$set : {'products.$.quantity' : existingProduct.quantity + newQuantity},
             $inc: {totalNoOfProducts: newQuantity, totalCost: (newQuantity * (productExist.price))}},
-            {new: true});
+            {new: true, runValidators: true,});
         return res.status(200).send(newCartExistingProduct);
     }
 
@@ -51,7 +51,7 @@ router.post('/', asyncHandler(async (req,res)=>{
     const newCart = await Cart.findOneAndUpdate({customer : userId},
                                 {$push : {products : productDetails}, 
                                 $inc: {totalNoOfProducts: newQuantity, totalCost: (newQuantity * (productExist.price))}},
-                                {new: true, upsert: true});
+                                {new: true, upsert: true, runValidators: true,});
     res.status(200).send(newCart);
 }));
 
@@ -70,7 +70,7 @@ router.delete('/:id', asyncHandler(async (req,res)=>{
     const newCart = await Cart.findOneAndUpdate({customer: req.user.id, 'products.product': productId},
         {$pull : {products: {product: productId}},
         $inc: {totalNoOfProducts: (-1 * existingProduct.quantity), totalCost: ((-1) * (existingProduct.quantity) * (existingProduct.price))}},
-        {new: true}
+        {new: true, runValidators: true,}
     );
     res.status(200).send(newCart);
 }));
@@ -100,7 +100,7 @@ router.patch('/increase/:id', asyncHandler(async (req,res) => {
     const newCartExistingProduct = await Cart.findOneAndUpdate({customer : req.user.id, 'products.product': productId},
         {$set : {'products.$.quantity' : existingProduct.quantity + 1},
         $inc: {totalNoOfProducts: 1, totalCost: (existingProduct.price)}},
-        {new: true});
+        {new: true, runValidators: true,});
     return res.status(200).send(newCartExistingProduct);
 }));
 
@@ -120,7 +120,7 @@ router.patch('/decrease/:id', asyncHandler(async (req,res) => {
         const newCart = await Cart.findOneAndUpdate({customer: req.user.id, 'products.product': productId},
             {$pull : {products: {product: productId}},
             $inc: {totalNoOfProducts: -1, totalCost: ((-1) * (existingProduct.price))}},
-            {new: true}
+            {new: true, runValidators: true,}
         );
         return res.status(200).send(newCart);
     }
@@ -128,7 +128,7 @@ router.patch('/decrease/:id', asyncHandler(async (req,res) => {
     const newCartExistingProduct = await Cart.findOneAndUpdate({customer : req.user.id, 'products.product': productId},
         {$set : {'products.$.quantity' : existingProduct.quantity - 1},
         $inc: {totalNoOfProducts: -1, totalCost: ((-1) *existingProduct.price)}},
-        {new: true});
+        {new: true, runValidators: true,});
     return res.status(200).send(newCartExistingProduct);
 }));
 

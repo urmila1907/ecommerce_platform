@@ -2,10 +2,13 @@ const express = require('express');
 const router = express.Router();
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+
 const User = require("../models/User");
 const {authenticateToken, logout} = require("../middleware/Auth");
 const cartRoutes = require('../routes/Cart');
 const wishlistRoutes = require('../routes/Wishlist');
+const orderRoutes = require('../routes/Order');
+const paymentMethodRoutes = require('../routes/PaymentMethod');
 
 //Route for registering user
 router.post('/register', async (req,res)=>{
@@ -77,7 +80,7 @@ router.patch('/password-update', async (req,res)=>{
         if(isMatch) return res.status(400).send("New password is same as old password.");
         const newHashedPassword = await bcrypt.hash(newPassword, 10);
 
-        await User.findOneAndUpdate({_id: req.user.id}, {password: newHashedPassword},{new: true});
+        await User.findOneAndUpdate({_id: req.user.id}, {password: newHashedPassword},{new: true, runValidators: true});
         res.status(200).send("Password updated successfully!");
     }
     catch(err){
@@ -90,5 +93,11 @@ router.use('/cart', cartRoutes);
 
 //Route for handling wishlist routes
 router.use('/wishlist', wishlistRoutes);
+
+//Router for handling payment methods
+router.use('/payment-method', paymentMethodRoutes);
+
+//Route for handling order routes
+router.use('/order', orderRoutes);
 
 module.exports = router;
