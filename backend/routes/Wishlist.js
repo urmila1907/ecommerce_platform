@@ -37,7 +37,7 @@ router.post('/', asyncHandler(async (req,res)=>{
     const newWishlist = await Wishlist.findOneAndUpdate({customer : userId},
                                 {$push : {products : productDetails}, 
                                 $inc: {totalNoOfProducts: 1}},
-                                {new: true, upsert: true});
+                                {new: true, upsert: true, runValidators: true});
     res.status(200).send(newWishlist);
 }));
 
@@ -55,7 +55,7 @@ router.delete('/:id', asyncHandler(async (req,res)=>{
     const newWishlist = await Wishlist.findOneAndUpdate({customer: req.user.id, 'products.product': productId},
         {$pull : {products: {product: productId}},
         $inc: {totalNoOfProducts: -1}},
-        {new: true}
+        {new: true, runValidators: true}
     );
     res.status(200).send(newWishlist);
 }));
