@@ -9,6 +9,7 @@ const cartRoutes = require('../routes/Cart');
 const wishlistRoutes = require('../routes/Wishlist');
 const orderRoutes = require('../routes/Order');
 const paymentMethodRoutes = require('../routes/PaymentMethod');
+const paymentRoutes = require("../routes/Payment");
 
 //Route for registering user
 router.post('/register', async (req,res)=>{
@@ -96,6 +97,9 @@ router.use('/wishlist', wishlistRoutes);
 
 //Router for handling payment methods
 router.use('/payment-method', paymentMethodRoutes);
+
+//Router for handling payment routes
+router.use('/payment', paymentRoutes);
 
 //Route for handling order routes
 router.use('/order', orderRoutes);
