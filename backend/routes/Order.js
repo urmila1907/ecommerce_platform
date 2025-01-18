@@ -6,12 +6,21 @@ const asyncHandler = require("../middleware/AsyncHandler");
 const CartToOrder = require("../middleware/CartToOrder");
 const Order = require("../models/Order");
 const Cart = require("../models/Cart");
+const Payment = require("../models/Payment");
 
 // Helper to validate ObjectId
 const isValidObjectId = (id) => mongoose.Types.ObjectId.isValid(id);
 
 //Router for placing an order
 router.post('/', CartToOrder, asyncHandler(async (req,res) =>{
+    const { razorpayOrderId } = req.body;
+
+    // Check if the payment is verified
+    const payment = await Payment.findOne({ razorpay_order_id: razorpayOrderId, status: "paid" });
+    if (!payment) {
+        return res.status(400).send("Payment not verified or invalid payment details.");
+    }
+
     const products = req.products;
     const allOrderDetails = await Promise.all(
         products.map(product => Order.create({
@@ -25,7 +34,10 @@ router.post('/', CartToOrder, asyncHandler(async (req,res) =>{
         {$set: {products: []}, totalNoOfProducts: 0, totalCost: 0},
         {new: true, runValidators: true,}
     );
-    res.status(201).send(allOrderDetails);
+    res.status(201).send({
+        message: "Order processed successfully",
+        allOrderDetails
+    });
 }));
 
 //Router for getting all orders for a user

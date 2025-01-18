@@ -24,7 +24,7 @@ router.post('/', asyncHandler(async (req,res)=>{
         "message": "Payment method added successfully",
         "methodDetails": newPaymentMethod.methods
     });
-}))
+}));
 
 //Router for getting all payment methods for a user
 router.get('/', asyncHandler( async(req,res)=>{
@@ -33,6 +33,6 @@ router.get('/', asyncHandler( async(req,res)=>{
         return res.status(404).send("No payment method has yet been added for this user.");
     }
     return res.status(200).send(existPaymentMethod.methods);
-}))
+}));
 
 module.exports = router;

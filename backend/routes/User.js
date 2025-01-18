@@ -9,15 +9,17 @@ const cartRoutes = require('../routes/Cart');
 const wishlistRoutes = require('../routes/Wishlist');
 const orderRoutes = require('../routes/Order');
 const paymentMethodRoutes = require('../routes/PaymentMethod');
+const paymentRoutes = require("../routes/Payment");
 
 //Route for registering user
 router.post('/register', async (req,res)=>{
-    const {userName, password, role} = req.body;
+    const {userName, password, email, phoneNum, name} = req.body;
     try{
         const hashedPassword = await bcrypt.hash(password, 10);
-        const newUser = new User({userName, password: hashedPassword, role});
+        const newUser = new User({userName, password: hashedPassword, email, phoneNum, name});
         await newUser.save();
-        res.status(201).send("User registered successfully");
+        const token = jwt.sign({id: newUser.id, role: newUser.role}, process.env.JWT_SECRET, {expiresIn: "1h"});
+        res.json({token});
     } 
     catch(err){
         res.status(400).send("Error registering user: " + err);
@@ -26,7 +28,7 @@ router.post('/register', async (req,res)=>{
 
 //Route for user login
 router.post('/login', async (req,res)=>{
-    const {userName, password, role} = req.body;
+    const {userName, password} = req.body;
     try{
         const user = await User.findOne({userName});
         if(!user) return res.status(404).send("User not found");
@@ -96,6 +98,9 @@ router.use('/wishlist', wishlistRoutes);
 
 //Router for handling payment methods
 router.use('/payment-method', paymentMethodRoutes);
+
+//Router for handling payment routes
+router.use('/payment', paymentRoutes);
 
 //Route for handling order routes
 router.use('/order', orderRoutes);
