@@ -27,6 +27,11 @@ export default function Navbar(){
                     About
                 </Link>
                 </li>
+                <li>
+                <Link href="/login" style={styles.link}>
+                    Login / Register
+                </Link>
+                </li>
             </ul>
         </nav>
     );
