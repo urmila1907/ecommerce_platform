@@ -2,26 +2,26 @@ const jwt = require('jsonwebtoken');
 const blacklistedTokens = [];
 
 function logout(req,res){
-    const token = req.headers['authorization'].split(" ")[1];
+    const token = req.cookies.authToken;
     blacklistedTokens.push(token);
     res.send("Logged out!");
 }
 
-function authenticateToken(req,res,next){
-    const authHeader = req.headers['authorization'];
-    if(!authHeader || !authHeader.startsWith("Bearer ")) {
-        return res.status(401).send("Access denied!");
+function authenticateToken(req, res, next) {
+    console.log("Cookies in middleware:", req.cookies);
+    const token = req.cookies.authToken; 
+    if (!token) {
+        console.log("Token missing");
+        return res.status(401).send("User not authorized");
     }
-    const token = authHeader.split(" ")[1];
-    if(blacklistedTokens.includes(token)) {
-        return res.status(403).send("Token is invalidated.");
-    }
-    jwt.verify(token, process.env.JWT_SECRET, (err,user)=>{
-        if(err) return res.status(403).send("Token Invalid!");
-        req.user = user;
+    try {
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        req.user = decoded; 
         next();
-    })
+    } catch (err) {
+        console.error("Token verification failed:", err.message);
+        return res.status(401).send("Unauthorized: Invalid token");
+    }
 }
-
 
 module.exports = {authenticateToken, logout};

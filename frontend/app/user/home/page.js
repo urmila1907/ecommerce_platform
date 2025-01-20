@@ -2,7 +2,10 @@ import Navbar from "@/app/components/Navbar";
 
 export default async function Home(){
     try{
-            const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/product`);
+            const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/product`,{
+                method: "GET",
+                credentials: "include"
+            });
             if (!res.ok) {
                 return <div style={styles.error}>Failed to fetch products</div>;
             }
@@ -15,10 +18,11 @@ export default async function Home(){
             return (
                 <div>
                     <Navbar items={[{name: "Home", url: "/user/home"},
-                        {name: "Products", url: "/user/products"},
-                        {name: "Wishlist", url: "/user/Wishlist"},
+                        {name: "My Orders", url: "/user/orders"},
+                        {name: "Wishlist", url: "/user/wishlist"},
                         {name: "Cart", url: "/user/cart"},
-                        {name: "My Orders", url: "/user/orders"}]}
+                        {name: "Log out", url: "/user/logout"},
+                        ]}
                     />
                     <div style={styles.products}>
                         {products.map((product) => (

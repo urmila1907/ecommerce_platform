@@ -44,7 +44,7 @@ router.post('/', CartToOrder, asyncHandler(async (req,res) =>{
 router.get('/', asyncHandler(async (req,res)=>{
     const orderDetails = await Order.find({customer: req.user.id});
     if(!orderDetails){
-        return res.status(404).send("No orders present. Do some shopping!");
+        return res.status(200).send("No orders present. Do some shopping!");
     }
     return res.status(200).send(orderDetails);
 }));

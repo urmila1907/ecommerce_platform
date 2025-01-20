@@ -20,8 +20,14 @@ router.post('/register', async (req, res) => {
         await newUser.save();
 
         const token = jwt.sign({ id: newUser._id, role: newUser.role }, process.env.JWT_SECRET, { expiresIn: "1h" });
-        console.log("User registered successfully:", newUser);
-        res.json({ ok: true, token });
+        res.cookie("authToken", token, {
+            httpOnly: true, // Prevents JavaScript access
+            secure: false, // HTTPS only in production
+            sameSite: 'lax',
+            maxAge: 3600000, // 1 hour in milliseconds
+            path: "/",
+        });
+        res.status(200).json({ message: "User registered successfully" });
     } catch (err) {
         res.status(400).json({ ok: false, error: "Error registering user: " + err.message });
     }
@@ -37,7 +43,16 @@ router.post('/login', async (req,res)=>{
         if(!isPassMatch) return res.status(401).send("Invalid credentials!");
 
         const token = jwt.sign({id: user.id, role: user.role}, process.env.JWT_SECRET, {expiresIn: "1h"});
-        res.json({token});
+
+        res.cookie("authToken", token, {
+            httpOnly: true, // Prevents JavaScript access
+            secure: false, // HTTPS only in production
+            sameSite: 'None',
+            maxAge: 3600000, // 1 hour in milliseconds
+            path: "/",
+        });
+
+        res.status(200).json({ message: "Logged in successfully" });
     }
     catch(err){
         res.status(500).send("Server error: "+ err.message);
@@ -104,6 +119,6 @@ router.use('/payment-method', paymentMethodRoutes);
 router.use('/payment', paymentRoutes);
 
 //Route for handling order routes
-router.use('/order', orderRoutes);
+router.use('/order', authenticateToken, orderRoutes);
 
 module.exports = router;

@@ -41,10 +41,13 @@ export default function Login(){
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(formData),
+            credentials: "include",
         });
+
+        if(!res.ok) {
+            throw new Error(`HTTP error! Status: ${res.status}`);
+        }
         const result = await res.json();
-        console.log(result);
-        if(!result.ok) console.log("error in logging in user");
         router.push(`${process.env.NEXT_PUBLIC_BASE_URL}/user/home`);
     }
     return (
@@ -57,7 +60,6 @@ export default function Login(){
                     width="400" 
                     height="400"
                     style={styles.image}>
-
                     </Image>
                 </div>
                 
