@@ -1,41 +1,41 @@
-import Navbar from "../components/Navbar";
+import Navbar from "@/app/components/Navbar";
 
-export default async function Products(){
+export default async function Home(){
     try{
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/product`);
-        if (!res.ok) {
-            return <div style={styles.error}>Failed to fetch products</div>;
-        }
-        const data = await res.json();
-        const products = data.products || [];
-
-        if (products.length === 0) {
-            return <div style={styles.noProducts}>No products available</div>;
-        }
-        return (
-            <div>
-                <Navbar items={[{name: "Home", url: "/"},
-                                        {name: "Products", url: "/products"},
-                                        {name: "About", url: "/about"},
-                                        {name: "Contact us", url: "/contact"},
-                                        {name: "Login / Register", url: "/login"}]}
-                />
-                <div style={styles.products}>
-                    {products.map((product) => (
-                        <div key={product._id} style={styles.product}>
-                            <h3 style={styles.productName}>{product.productName}</h3>
-                            <h4 style={styles.productDescription}>{product.description}</h4>
-                            <h5 style={styles.productPrice}>Price: ₹{product.price}</h5>
-                            <h5 style={styles.productQuantity}>Available: {product.quantity}</h5>
-                        </div>
-                    ))}
+            const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/product`);
+            if (!res.ok) {
+                return <div style={styles.error}>Failed to fetch products</div>;
+            }
+            const data = await res.json();
+            const products = data.products || [];
+    
+            if (products.length === 0) {
+                return <div style={styles.noProducts}>No products available</div>;
+            }
+            return (
+                <div>
+                    <Navbar items={[{name: "Home", url: "/user/home"},
+                        {name: "Products", url: "/user/products"},
+                        {name: "Wishlist", url: "/user/Wishlist"},
+                        {name: "Cart", url: "/user/cart"},
+                        {name: "My Orders", url: "/user/orders"}]}
+                    />
+                    <div style={styles.products}>
+                        {products.map((product) => (
+                            <div key={product._id} style={styles.product}>
+                                <h3 style={styles.productName}>{product.productName}</h3>
+                                <h4 style={styles.productDescription}>{product.description}</h4>
+                                <h5 style={styles.productPrice}>Price: ₹{product.price}</h5>
+                                <h5 style={styles.productQuantity}>Available: {product.quantity}</h5>
+                            </div>
+                        ))}
+                    </div>
                 </div>
-            </div>
-        );
-    }catch (err) {
-        console.error('Error fetching products:', err);
-        return <div>Server error while fetching products</div>;
-    }
+            );
+        }catch (err) {
+            console.error('Error fetching products:', err);
+            return <div>Server error while fetching products</div>;
+        }
 }
 
 const styles = {

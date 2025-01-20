@@ -45,7 +45,7 @@ export default function Login(){
         const result = await res.json();
         console.log(result);
         if(!result.ok) console.log("error in logging in user");
-        router.push(`${process.env.NEXT_PUBLIC_BASE_URL}`);
+        router.push(`${process.env.NEXT_PUBLIC_BASE_URL}/user/home`);
     }
     return (
         <div style={styles.container}>
