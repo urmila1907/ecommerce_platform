@@ -12,17 +12,18 @@ const paymentMethodRoutes = require('../routes/PaymentMethod');
 const paymentRoutes = require("../routes/Payment");
 
 //Route for registering user
-router.post('/register', async (req,res)=>{
-    const {userName, password, email, phoneNum, name} = req.body;
-    try{
+router.post('/register', async (req, res) => {
+    const { userName, password, email, phoneNum, name } = req.body;
+    try {
         const hashedPassword = await bcrypt.hash(password, 10);
-        const newUser = new User({userName, password: hashedPassword, email, phoneNum, name});
+        const newUser = new User({ userName, password: hashedPassword, email, phoneNum, name });
         await newUser.save();
-        const token = jwt.sign({id: newUser.id, role: newUser.role}, process.env.JWT_SECRET, {expiresIn: "1h"});
-        res.json({token});
-    } 
-    catch(err){
-        res.status(400).send("Error registering user: " + err);
+
+        const token = jwt.sign({ id: newUser._id, role: newUser.role }, process.env.JWT_SECRET, { expiresIn: "1h" });
+        console.log("User registered successfully:", newUser);
+        res.json({ ok: true, token });
+    } catch (err) {
+        res.status(400).json({ ok: false, error: "Error registering user: " + err.message });
     }
 });
 

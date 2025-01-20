@@ -3,6 +3,7 @@ import Image from "next/image";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import {FaEyeSlash, FaEye} from "react-icons/fa";
 
 export default function Login(){
     const [formData, setFormData] = useState({
@@ -11,6 +12,8 @@ export default function Login(){
         rememberMe: false,
     });
 
+    const [showPassword, setShowPassword] = useState(false);
+    const [isPasswordFocus, setIsPasswordFocus] = useState(false);
     const router = useRouter();
 
     const handleChange = (e) => {
@@ -22,9 +25,19 @@ export default function Login(){
         router.push(`${process.env.NEXT_PUBLIC_BASE_URL}/register`);
     };
 
+    const togglePasswordVisibility = ()=>{
+        setShowPassword(!showPassword);
+    }
+    const handleFocus = ()=>{
+        setIsPasswordFocus(true);
+    }
+    const handleBlur = ()=>{
+        setIsPasswordFocus(false);
+    }
+
     const handleSubmit = async (e) =>{
         e.preventDefault();
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/login`,{
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/user/login`,{
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(formData),
@@ -68,14 +81,32 @@ export default function Login(){
                         </label>
 
                         <label style={styles.label}>
-                            Password: 
-                            <input type="text" 
-                            name="password" 
-                            required 
-                            value={formData.password}
-                            onChange={handleChange}
-                            style={styles.input}
-                            />
+                            Password:
+                            <div 
+                                style={styles.passwordContainer}
+                                onFocus={() => setIsPasswordFocus(true)} 
+                                onBlur={() => setIsPasswordFocus(false)} 
+                            > 
+                                <input
+                                    type={showPassword ? "text" : "password"}
+                                    name="password"
+                                    required
+                                    value={formData.password}
+                                    onFocus={handleFocus}
+                                    onBlur={handleBlur}
+                                    onChange={handleChange}
+                                    style={styles.input}
+                                />
+                                {(isPasswordFocus &&
+                                    <span
+                                        style={styles.icon}
+                                        onMouseDown={(e) => e.preventDefault()}
+                                        onClick={togglePasswordVisibility}
+                                    >
+                                        {showPassword ? <FaEyeSlash/> : <FaEye/>}
+                                    </span>
+                                )}
+                            </div>
                         </label>
 
                         <div style={styles.password}>
@@ -169,14 +200,30 @@ const styles = {
         color: "#444", // Slightly lighter grey
         fontWeight: "500",
     },
-    input:{
-        padding: "0.8rem",
+    passwordContainer: {
+        position: "relative",
+        width: "100%",
+    },
+    icon: {
+        position: "absolute",
+        top: "50%", // Vertically center the icon
+        right: "1rem", // Position the icon to the right of the input
+        transform: "translateY(-50%)", // Center the icon vertically
+        cursor: "pointer",
+        fontSize: "18px",
+        color: "#888",
+        transition: "color 0.2s ease",
+    }, 
+    input: {
+        width: "100%", // Full width of the input
+        padding: "0.5rem 2.5rem 0.5rem 0.5rem", // Add right padding for the icon
         fontSize: "16px",
         border: "1px solid #ddd",
         borderRadius: "6px",
         outline: "none",
         transition: "border-color 0.2s ease",
-    },
+        boxSizing: "border-box",
+    }, 
     password: {
         display: "flex",
         justifyContent: "space-between",
