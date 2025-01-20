@@ -1,37 +1,21 @@
 import Link from "next/link";
 import Image from "next/image";
 
-export default function Navbar(){
+export default function Navbar({ items }) {
     return (
         <nav style={styles.navbar}>
             <div style={styles.title}>
-                <Image src="/logo.png" alt="App logo" width="30" height="30"></Image>
+                <Image src="/logo.png" alt="App logo" width="30" height="30" />
                 <h1>E-commerce App</h1>
             </div>
             <ul style={styles.list}>
-                <li><Link href="/" style={styles.link}>
-                    Home
-                </Link></li>
-                <li>
-                <Link href="/products" style={styles.link}>
-                    Products
-                </Link>
-                </li>
-                <li>
-                <Link href="/contact" style={styles.link}>
-                    Contact us
-                </Link>
-                </li>
-                <li>
-                <Link href="/about" style={styles.link}>
-                    About
-                </Link>
-                </li>
-                <li>
-                <Link href="/login" style={styles.link}>
-                    Login / Register
-                </Link>
-                </li>
+                {items.map((item) => (
+                    <li key={item.name}>
+                        <Link href={item.url} style={styles.link}>
+                            {item.name}
+                        </Link>
+                    </li>
+                ))}
             </ul>
         </nav>
     );

@@ -14,7 +14,12 @@ export default async function Products(){
         }
         return (
             <div>
-                <Navbar/>
+                <Navbar items={[{name: "Home", url: "/"},
+                                        {name: "Products", url: "/products"},
+                                        {name: "About", url: "/about"},
+                                        {name: "Contact us", url: "/contact"},
+                                        {name: "Login / Register", url: "/login"}]}
+                />
                 <div style={styles.products}>
                     {products.map((product) => (
                         <div key={product._id} style={styles.product}>

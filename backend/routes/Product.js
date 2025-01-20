@@ -100,7 +100,8 @@ router.get('/', async (req,res)=>{
         //If no products exist
         if(products.length == 0) {
             return res.status(404).send("No products exist!");
-        }
+        };
+        
         res.status(200).json({
             total: count,
             currentPage: page,
