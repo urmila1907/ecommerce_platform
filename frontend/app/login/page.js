@@ -37,18 +37,17 @@ export default function Login(){
 
     const handleSubmit = async (e) =>{
         e.preventDefault();
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/user/login`,{
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/login`,{
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(formData),
             credentials: "include",
         });
-
         if(!res.ok) {
             throw new Error(`HTTP error! Status: ${res.status}`);
         }
         const result = await res.json();
-        router.push(`${process.env.NEXT_PUBLIC_BASE_URL}/user/home`);
+        router.push("/user/home");
     }
     return (
         <div style={styles.container}>

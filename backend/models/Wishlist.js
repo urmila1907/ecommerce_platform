@@ -7,11 +7,6 @@ const wishlistSchema = new mongoose.Schema({
             type: Schema.Types.ObjectId,
             ref: 'Product',
             required: true
-        },
-        price: {
-            type: Number,
-            min: 1,
-            required: true
         }
     }],
     totalNoOfProducts: {

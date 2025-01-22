@@ -77,11 +77,11 @@ router.delete('/:id', asyncHandler(async (req,res)=>{
 
 //Router for getting all the products in cart
 router.get('/', asyncHandler(async (req,res)=>{
-    const userCart = await Cart.findOne({customer : req.user.id});
+    const userCart = await Cart.findOne({customer : req.user.id}).populate('products.product');
     if(userCart == null || userCart.products.length == 0) {
-        return res.status(200).send("Cart is empty.");
+        return res.status(200).json({msg: "Cart is empty."});
     }
-    res.status(200).send(userCart);
+    res.status(200).json({userCart});
 }));
 
 //Router for increasing quantity of a product in cart

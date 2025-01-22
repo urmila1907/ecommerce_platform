@@ -1,18 +1,28 @@
 const jwt = require('jsonwebtoken');
-const blacklistedTokens = [];
 
 function logout(req,res){
-    const token = req.cookies.authToken;
-    blacklistedTokens.push(token);
-    res.send("Logged out!");
+    res.clearCookie('authToken', {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        path: '/'
+    });
+    res.status(200).json({ message: "Logged out successfully" });
 }
 
 function authenticateToken(req, res, next) {
-    console.log("Cookies in middleware:", req.cookies);
-    const token = req.cookies.authToken; 
+    // Check if Authorization header is present
+    const authHeader = req.headers.authorization;
+    
+    if (!authHeader) {
+        return res.status(401).json({ error: 'Authorization header is missing' });
+    }
+
+    // Split the Authorization header into "Bearer <token>"
+    const token = authHeader.split(" ")[1];
+
     if (!token) {
-        console.log("Token missing");
-        return res.status(401).send("User not authorized");
+        return res.status(400).json({ error: 'User not authorized' });
     }
     try {
         const decoded = jwt.verify(token, process.env.JWT_SECRET);

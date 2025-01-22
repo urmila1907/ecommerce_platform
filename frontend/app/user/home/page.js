@@ -1,45 +1,47 @@
 import Navbar from "@/app/components/Navbar";
+import {fetchWithToken} from "@/utils/fetchWithToken";
 
 export default async function Home(){
     try{
-            const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/product`,{
-                method: "GET",
-                credentials: "include"
-            });
-            if (!res.ok) {
-                return <div style={styles.error}>Failed to fetch products</div>;
-            }
-            const data = await res.json();
-            const products = data.products || [];
-    
-            if (products.length === 0) {
-                return <div style={styles.noProducts}>No products available</div>;
-            }
-            return (
-                <div>
-                    <Navbar items={[{name: "Home", url: "/user/home"},
-                        {name: "My Orders", url: "/user/orders"},
-                        {name: "Wishlist", url: "/user/wishlist"},
-                        {name: "Cart", url: "/user/cart"},
-                        {name: "Log out", url: "/user/logout"},
-                        ]}
-                    />
-                    <div style={styles.products}>
-                        {products.map((product) => (
-                            <div key={product._id} style={styles.product}>
-                                <h3 style={styles.productName}>{product.productName}</h3>
-                                <h4 style={styles.productDescription}>{product.description}</h4>
-                                <h5 style={styles.productPrice}>Price: ₹{product.price}</h5>
-                                <h5 style={styles.productQuantity}>Available: {product.quantity}</h5>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-            );
-        }catch (err) {
-            console.error('Error fetching products:', err);
-            return <div>Server error while fetching products</div>;
+        const res = await fetchWithToken(`${process.env.NEXT_PUBLIC_API_BASE_URL}/user/`, {
+            method: 'GET',
+        });
+
+        if (!res.ok) {
+            return <div style={styles.error}>Failed to fetch home details</div>;
         }
+        const data = await res.json();
+        const products = data.products;
+        if (!Array.isArray(products) || products.length === 0) {
+            return <div style={styles.noProducts}>No products available</div>
+        };
+
+        return (
+            <div>
+                <Navbar items={[{name: "Home", url: "/user/home"},
+                    {name: "My Orders", url: "/user/orders"},
+                    {name: "Wishlist", url: "/user/wishlist"},
+                    {name: "Cart", url: "/user/cart"},
+                    {name: "Log out", url: "/user/logout"},
+                    ]}
+                />
+                
+                <div style={styles.products}>
+                    {products.map((product) => (
+                        <div key={product._id} style={styles.product}>
+                            <h3 style={styles.productName}>{product.productName}</h3>
+                            <h4 style={styles.productDescription}>{product.description}</h4>
+                            <h5 style={styles.productPrice}>Price: ₹{product.price}</h5>
+                            <h5 style={styles.productQuantity}>Available: {product.quantity}</h5>
+                        </div>
+                    ))}
+                </div>
+            </div>
+        );
+    }catch (err) {
+        console.error('Error fetching products:', err);
+        return <div>Server error while fetching products</div>;
+    }
 }
 
 const styles = {
