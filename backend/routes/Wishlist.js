@@ -62,11 +62,11 @@ router.delete('/:id', asyncHandler(async (req,res)=>{
 
 //Router for getting all the products in wishlist
 router.get('/', asyncHandler(async (req,res)=>{
-    const userWishlist = await Wishlist.findOne({customer : req.user.id});
+    const userWishlist = await Wishlist.findOne({customer : req.user.id}).populate('products.product');
     if(userWishlist == null || userWishlist.products.length == 0) {
         return res.status(200).send("Cart is empty.");
     }
-    res.status(200).send(userWishlist);
+    res.status(200).json({products: userWishlist.products});
 }));
 
 module.exports = router;

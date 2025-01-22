@@ -1,0 +1,137 @@
+import Navbar from "@/app/components/Navbar";
+import {fetchWithToken} from "@/utils/fetchWithToken";
+
+export default async function Cart(){
+    try{
+        const res = await fetchWithToken(`${process.env.NEXT_PUBLIC_API_BASE_URL}/user/cart`, {
+                    method: 'GET',
+                });
+        if (!res.ok) {
+            const errorText = await res.text();
+            return <div>Failed to fetch cart details: {errorText}</div>;
+        }
+        const data = await res.json();
+        const cart = data.userCart;
+
+        return (
+            <div>
+                <Navbar items={[{name: "Home", url: "/user/home"},
+                                            {name: "My Orders", url: "/user/orders"},
+                                            {name: "Wishlist", url: "/user/wishlist"},
+                                            {name: "Cart", url: "/user/cart"},
+                                            {name: "Log out", url: "/user/logout"},
+                                ]} 
+                />
+
+                <div style={styles.cartContainer}>
+                    <div style={styles.cartProducts}>
+                        {cart.products.map((product) => (
+                            <div key={product._id} style={styles.productDetails}>
+                                <h3 style={styles.productName}>{product.product.productName}</h3>
+                                <p style={styles.productDesc}>{product.product.description}</p>
+                                <p style={styles.productQty}>Qty: {product.quantity}</p>
+                                <p style={styles.productPrice}>Amount: ₹{product.price}</p>
+                            </div>
+                        ))}
+                    </div>
+                    <div style={styles.amountDetails}>
+                        <h3 style={styles.totalAmount}>Total Amount: ₹{cart.totalCost}</h3>
+                        <button style={styles.orderBtn}>Place Order</button>
+                    </div>
+                </div>
+            </div>
+        )
+    }catch(err){
+        console.error('Error fetching products:', err);
+        return <div style={styles.error}>Server error while fetching cart details</div>;
+    }
+}
+
+const styles = {
+    cartContainer: {
+        display: "flex",
+        flexWrap: "wrap",
+        justifyContent: "space-between",
+        alignItems: "flex-start",
+        padding: "2rem",
+        backgroundColor: "#FFFFFF",
+        borderRadius: "8px",
+        boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
+        gap: "2rem",
+    },
+    cartProducts: {
+        flex: "2",
+        display: "flex",
+        flexWrap: "wrap",
+        flexDirection: "column",
+        gap: "1.5rem",
+    },
+    productDetails: {
+        backgroundColor: "#F1F5F9",
+        borderRadius: "8px",
+        padding: "1rem",
+        boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",
+        transition: "transform 0.3s ease, box-shadow 0.3s ease",
+    },
+    productDetailsHover: {
+        transform: "scale(1.02)",
+        boxShadow: "0 4px 12px rgba(0, 0, 0, 0.15)",
+    },
+    productName: {
+        fontSize: "1.2rem",
+        fontWeight: "600",
+        marginBottom: "0.5rem",
+    },
+    productDesc: {
+        fontSize: "1rem",
+        color: "#718096",
+        marginBottom: "0.5rem",
+    },
+    productQty: {
+        fontSize: "1rem",
+        color: "#48BB78",
+        marginBottom: "0.5rem",
+    },
+    productPrice: {
+        fontSize: "1rem",
+        fontWeight: "700",
+        color: "#E53E3E",
+    },
+    amountDetails: {
+        flex: "1",
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        backgroundColor: "#EDF2F7",
+        borderRadius: "8px",
+        padding: "2rem",
+        boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",
+    },
+    totalAmount: {
+        fontSize: "1.5rem",
+        fontWeight: "700",
+        color: "#2B6CB0",
+        marginBottom: "1rem",
+    },
+    orderBtn: {
+        backgroundColor: "#4A90E2",
+        color: "#FFFFFF",
+        fontSize: "1rem",
+        fontWeight: "600",
+        padding: "0.8rem 1.5rem",
+        border: "none",
+        borderRadius: "4px",
+        cursor: "pointer",
+        transition: "background-color 0.3s ease",
+    },
+    orderBtnHover: {
+        backgroundColor: "#2563EB",
+    },
+    error: {
+        color: "#E53E3E",
+        textAlign: "center",
+        fontSize: "1.2rem",
+        marginTop: "2rem",
+    },
+}

@@ -2,7 +2,10 @@ import Navbar from "../components/Navbar";
 
 export default async function Products(){
     try{
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/product`);
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/product`,{
+            method: "GET",
+            credentials: "include"
+        });
         if (!res.ok) {
             return <div style={styles.error}>Failed to fetch products</div>;
         }

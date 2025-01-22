@@ -42,11 +42,11 @@ router.post('/', CartToOrder, asyncHandler(async (req,res) =>{
 
 //Router for getting all orders for a user
 router.get('/', asyncHandler(async (req,res)=>{
-    const orderDetails = await Order.find({customer: req.user.id});
+    const orderDetails = await Order.find({customer: req.user.id}).populate('product');
     if(!orderDetails){
         return res.status(200).send("No orders present. Do some shopping!");
     }
-    return res.status(200).send(orderDetails);
+    return res.status(200).json({orderDetails});
 }));
 
 //Router for getting a specific order for a user

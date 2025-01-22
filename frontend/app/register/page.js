@@ -39,7 +39,7 @@ export default function Register(){
     const handleSubmit = async (e) => {
         try {
             e.preventDefault();
-            const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/user/register`, {
+            const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/register`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(formData),
@@ -50,7 +50,7 @@ export default function Register(){
             }
     
             await res.json();
-            router.push(`${process.env.NEXT_PUBLIC_BASE_URL}/user/home`);
+            router.push(`${process.env.NEXT_PUBLIC_BASE_URL}/user`);
         } catch (err) {
             console.error("Error during registration:", err.message);
         }
