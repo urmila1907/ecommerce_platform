@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const mongoose = require('mongoose');
-const {authenticateToken} = require("../middleware/Auth");
+const authenticateToken = require("../middleware/Auth");
 const Product = require("../models/Product");
 
 //Route for creating a product

@@ -1,15 +1,5 @@
 const jwt = require('jsonwebtoken');
 
-function logout(req,res){
-    res.clearCookie('authToken', {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'lax',
-        path: '/'
-    });
-    res.status(200).json({ message: "Logged out successfully" });
-}
-
 function authenticateToken(req, res, next) {
     // Check if Authorization header is present
     const authHeader = req.headers.authorization;
@@ -19,7 +9,7 @@ function authenticateToken(req, res, next) {
     }
 
     // Split the Authorization header into "Bearer <token>"
-    const token = authHeader.split(" ")[1];
+    const token = req.cookies.authToken || authHeader.split(' ')[1];
 
     if (!token) {
         return res.status(400).json({ error: 'User not authorized' });
@@ -34,4 +24,4 @@ function authenticateToken(req, res, next) {
     }
 }
 
-module.exports = {authenticateToken, logout};
+module.exports = authenticateToken;

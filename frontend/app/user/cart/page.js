@@ -1,17 +1,79 @@
+"use client";
+import { useState, useEffect } from "react";
 import Navbar from "@/app/components/Navbar";
-import {fetchWithToken} from "@/utils/fetchWithToken";
+import { CiCircleMinus, CiCirclePlus  } from "react-icons/ci";
 
-export default async function Cart(){
-    try{
-        const res = await fetchWithToken(`${process.env.NEXT_PUBLIC_API_BASE_URL}/user/cart`, {
-                    method: 'GET',
-                });
-        if (!res.ok) {
-            const errorText = await res.text();
-            return <div>Failed to fetch cart details: {errorText}</div>;
+export default function Cart(){
+        const [cart, setCart] = useState(null);
+        const [error, setError] = useState(null);
+
+        useEffect(() => {
+            const fetchCart = async () => {
+                try {
+                    const res = await fetch("/api/proxy/user/cart", {
+                        method: "GET",
+                    });
+
+                    if (!res.ok) {
+                        const errorText = await res.text();
+                        setError(errorText);
+                        return;
+                    }
+
+                    const data = await res.json();
+                    setCart(data.userCart);
+
+                } catch (err) {
+                    console.error("Error fetching cart:", err);
+                    setError("Server error while fetching cart details");
+                }
+            };
+            fetchCart();
+        }, []); // Empty dependency array to run only once
+
+        const handleMinus = async (id) => {
+            try {
+                const res = await fetch(`/api/proxy/user/cart/decrease/${id}`, {
+                            method: "PATCH",
+                            });
+                if (!res.ok) {
+                    const errorText = await res.text();
+                    setError(errorText);
+                    return;
+                }
+                const data = await res.json();
+                setCart(data.userCart); // Update cart state
+            } catch (err) {
+                console.error("Error decreasing quantity:", err);
+                setError("Failed to decrease product quantity");
+            }
+        };
+    
+        const handlePlus = async (id) => {
+            try {
+                const res = await fetch(`/api/proxy/user/cart/increase/${id}`, {
+                    method: "PATCH",
+                    });
+                if (!res.ok) {
+                    const errorText = await res.text();
+                    setError(errorText);
+                    return;
+                }
+                const data = await res.json();
+                setCart(data.userCart); // Update cart state
+            } catch (err) {
+                console.error("Error increasing quantity:", err);
+                setError("Failed to increase product quantity");
+            }
+        };
+    
+        if (error) {
+            return <div style={styles.error}>{error}</div>;
         }
-        const data = await res.json();
-        const cart = data.userCart;
+    
+        if (!cart) {
+            return <div style={styles.loading}>Loading cart details...</div>;
+        }
 
         return (
             <div>
@@ -29,7 +91,11 @@ export default async function Cart(){
                             <div key={product._id} style={styles.productDetails}>
                                 <h3 style={styles.productName}>{product.product.productName}</h3>
                                 <p style={styles.productDesc}>{product.product.description}</p>
-                                <p style={styles.productQty}>Qty: {product.quantity}</p>
+                                <div style={styles.quantityDetails}>
+                                    <button onClick={() => handleMinus(product._id)} style={styles.minusBtn}><CiCircleMinus/></button>
+                                    <p style={styles.productQty}>Qty: {product.quantity}</p>
+                                    <button onClick={() => handlePlus(product._id)} style={styles.plusBtn}><CiCirclePlus/></button>
+                                </div>
                                 <p style={styles.productPrice}>Amount: ₹{product.price}</p>
                             </div>
                         ))}
@@ -41,10 +107,6 @@ export default async function Cart(){
                 </div>
             </div>
         )
-    }catch(err){
-        console.error('Error fetching products:', err);
-        return <div style={styles.error}>Server error while fetching cart details</div>;
-    }
 }
 
 const styles = {
@@ -85,6 +147,16 @@ const styles = {
     productDesc: {
         fontSize: "1rem",
         color: "#718096",
+        marginBottom: "0.5rem",
+    },
+    quantityDetails: {
+        display: "flex",
+        gap: "0.7rem"
+    },
+    minusBtn: {
+        marginBottom: "0.5rem",
+    },
+    plusBtn: {
         marginBottom: "0.5rem",
     },
     productQty: {

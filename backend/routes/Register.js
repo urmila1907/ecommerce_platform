@@ -21,7 +21,7 @@ router.post('/register', async (req, res) => {
             maxAge: 3600000, // 1 hour in milliseconds
             path: "/",
         });
-        res.status(200).json({ message: "User registered successfully" });
+        res.status(200).json({ message: "User registered successfully", token: token });
     } catch (err) {
         res.status(400).json({ ok: false, error: "Error registering user: " + err.message });
     }
