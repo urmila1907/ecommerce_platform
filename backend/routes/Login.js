@@ -15,6 +15,7 @@ router.post('/', async (req,res)=>{
         if(!isPassMatch) return res.status(401).send("Invalid credentials!");
 
         const token = jwt.sign({id: user.id, role: user.role}, process.env.JWT_SECRET, {expiresIn: "1h"});
+        const refreshToken = jwt.sign({ id: user.id, role: user.role }, process.env.REFRESH_SECRET, { expiresIn: "7d" });
 
         res.cookie("authToken", token, {
             httpOnly: true, // Prevents JavaScript access
@@ -24,7 +25,14 @@ router.post('/', async (req,res)=>{
             path: "/",
         });
         
-        res.status(200).json({ message: "Logged in successfully", token: token});
+        res.cookie("refreshToken", refreshToken, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'lax',
+            maxAge: 604800000, // 7 days
+        });
+
+        res.status(200).json({ message: "Logged in successfully"});
     }
     catch(err){
         res.status(500).send("Server error: "+ err.message);

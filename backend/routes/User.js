@@ -3,7 +3,7 @@ const router = express.Router();
 const bcrypt = require('bcryptjs');
 
 const User = require("../models/User");
-const {authenticateToken, logout} = require("../middleware/Auth");
+const authenticateToken = require("../middleware/Auth");
 const cartRoutes = require('../routes/Cart');
 const wishlistRoutes = require('../routes/Wishlist');
 const orderRoutes = require('../routes/Order');
@@ -18,7 +18,6 @@ router.use(authenticateToken);
 router.get('/', async (req,res) => {
     try{
         const products = await Product.find();
-        console.log(products);
         res.status(200).json({ products });
     }
     catch(err){
@@ -32,7 +31,11 @@ router.get('/profile', (req,res)=>{
 })
 
 //Route for logout
-router.post('/logout', logout);
+router.get('/logout', async (req,res)=>{
+    res.clearCookie("authToken");
+    res.clearCookie("refreshToken");
+    res.status(200).json({ message: "Logged out successfully" });
+})
 
 //Route for profile updation
 router.patch('/profile-update', async (req,res)=>{

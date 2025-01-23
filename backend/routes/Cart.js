@@ -93,7 +93,7 @@ router.patch('/increase/:id', asyncHandler(async (req,res) => {
         return res.status(400).send("Invalid product ID!");
     }
     const existProduct = await Cart.findOne({customer: req.user.id, 'products.product': productId});
-    if(!existProduct) return res.status(404).send("Product isn't present in the cart");
+    if(!existProduct) return res.status(404).json({msg : "Product isn't present in the cart"});
 
     const existingProduct = existProduct.products.find(p => p.product.toString() === productId.toString());
 
@@ -122,7 +122,7 @@ router.patch('/decrease/:id', asyncHandler(async (req,res) => {
             $inc: {totalNoOfProducts: -1, totalCost: ((-1) * (existingProduct.price))}},
             {new: true, runValidators: true,}
         );
-        return res.status(200).send(newCart);
+        return res.status(200).json({newCart});
     }
 
     const newCartExistingProduct = await Cart.findOneAndUpdate({customer : req.user.id, 'products.product': productId},
