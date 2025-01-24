@@ -1,9 +1,9 @@
 import { cookies } from 'next/headers';
 
 export async function fetchWithToken(url, options = {}) {
-  const token = await getTokenFromCookie();
+  let token = await getAuthTokenFromCookie();
 
-  const headers = new Headers(options.headers || {});
+  let headers = new Headers(options.headers || {});
   
   if (token) {
     headers.set("Authorization", `Bearer ${token}`);
@@ -12,11 +12,13 @@ export async function fetchWithToken(url, options = {}) {
   let response = await fetch(url, {
     ...options,
     headers,
-    credentials: "include",
   });
 
   if (response.status === 401) {
     // Trying to refresh the token
+    token = await getRefreshTokenFromCookie();
+    headers.set("Authorization", `Bearer ${token}`);
+
     const refreshResponse = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/refresh-token`, {
         method: "POST",
         credentials: "include",
@@ -24,9 +26,9 @@ export async function fetchWithToken(url, options = {}) {
 
     if (refreshResponse.ok) {
         // Retry the original request
-        const refreshedToken = await refreshResponse.json();
-        console.log(refreshedToken);
-        headers.set("Authorization", `Bearer ${refreshedToken}`);
+        token = await getAuthTokenFromCookie();
+        headers.set("Authorization", `Bearer ${token}`);
+        
         response = await fetch(url, {
             ...options,
             headers,
@@ -38,7 +40,12 @@ export async function fetchWithToken(url, options = {}) {
   return response;
 }
 
-async function getTokenFromCookie() {
+async function getAuthTokenFromCookie() {
   const cookieStore = await cookies();
   return cookieStore.get('authToken')?.value;
+}
+
+async function getRefreshTokenFromCookie() {
+  const cookieStore = await cookies();
+  return cookieStore.get('refreshToken')?.value;
 }

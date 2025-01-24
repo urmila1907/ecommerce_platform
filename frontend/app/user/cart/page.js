@@ -6,8 +6,10 @@ import { CiCircleMinus, CiCirclePlus  } from "react-icons/ci";
 export default function Cart(){
     const [cart, setCart] = useState(null);
     const [error, setError] = useState(null);
+    const [isLoading, setIsLoading] = useState(true);
 
     const fetchCart = async () => {
+        setIsLoading(true);
         try {
             const res = await fetch("/api/proxy/user/cart", {
                 method: "GET",
@@ -16,17 +18,20 @@ export default function Cart(){
             if (!res.ok) {
                 const errorText = await res.text();
                 setError(errorText);
+                setIsLoading(false);
                 return;
             }
 
             const data = await res.json();
             setCart(data.userCart);
+            setIsLoading(false);
+
         } catch (err) {
             console.error("Error fetching cart:", err);
             setError("Server error while fetching cart details");
+            setIsLoading(false);
         }
     };
-        
 
     useEffect(() => {
         fetchCart();
@@ -81,33 +86,38 @@ export default function Cart(){
                                         {name: "Log out", url: "/user/logout"},
                             ]} 
             />
-            {cart != null ? 
+            {isLoading == true ? <>
+                <div style={styles.loading}>Loading cart details...</div>
+            </> : 
             <>
-                <div style={styles.cartContainer}>
-                    <div style={styles.cartProducts}>
-                        {cart.products.map((product) => (
-                            <div key={product._id} style={styles.productDetails}>
-                                <h3 style={styles.productName}>{product.product.productName}</h3>
-                                <p style={styles.productDesc}>{product.product.description}</p>
-                                <div style={styles.quantityDetails}>
-                                    <button onClick={() => handleMinus(product.product._id)} style={styles.minusBtn}><CiCircleMinus/></button>
-                                    <p style={styles.productQty}>Qty: {product.quantity}</p>
-                                    <button onClick={() => handlePlus(product.product._id)} style={styles.plusBtn}><CiCirclePlus/></button>
+                {cart && cart.products.length > 0 ? 
+                <>
+                    <div style={styles.cartContainer}>
+                        <div style={styles.cartProducts}>
+                            {cart.products.map((product) => (
+                                <div key={product._id} style={styles.productDetails}>
+                                    <h3 style={styles.productName}>{product.product.productName}</h3>
+                                    <p style={styles.productDesc}>{product.product.description}</p>
+                                    <div style={styles.quantityDetails}>
+                                        <button onClick={() => handleMinus(product.product._id)} style={styles.minusBtn}><CiCircleMinus/></button>
+                                        <p style={styles.productQty}>Qty: {product.quantity}</p>
+                                        <button onClick={() => handlePlus(product.product._id)} style={styles.plusBtn}><CiCirclePlus/></button>
+                                    </div>
+                                    <p style={styles.productPrice}>Amount: ₹{product.price}</p>
                                 </div>
-                                <p style={styles.productPrice}>Amount: ₹{product.price}</p>
-                            </div>
-                        ))}
+                            ))}
+                        </div>
+                    <div style={styles.amountDetails}>
+                        <h3 style={styles.totalAmount}>Total Amount: ₹{cart.totalCost}</h3>
+                        <button style={styles.orderBtn}>Place Order</button>
                     </div>
-                <div style={styles.amountDetails}>
-                    <h3 style={styles.totalAmount}>Total Amount: ₹{cart.totalCost}</h3>
-                    <button style={styles.orderBtn}>Place Order</button>
-                </div>
-                </div>
-            </> :
-            <>
-                <div style={styles.noProducts}>Do some shopping!</div>
-            </> 
-            }  
+                    </div>
+                </> :
+                <>
+                    <div style={styles.noProducts}>Do some shopping!</div>
+                </> 
+                }
+                </>}
         </div>
     )
 }
@@ -132,6 +142,12 @@ const styles = {
         gap: "1.5rem",
     },
     noProducts: {
+        color: "#4A90E2",
+        fontSize: "2rem",
+        textAlign: "center",
+        margin: "2rem"
+    },
+    loading: {
         color: "#4A90E2",
         fontSize: "2rem",
         textAlign: "center",

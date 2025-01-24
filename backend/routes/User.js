@@ -23,19 +23,29 @@ router.get('/', async (req,res) => {
     catch(err){
         res.status(400).send("Error in getting user's home page");
     }
-})
+});
 
 //Route for getting profile (protected)
 router.get('/profile', (req,res)=>{
     res.json({user: req.user});
-})
+});
 
 //Route for logout
 router.get('/logout', async (req,res)=>{
-    res.clearCookie("authToken");
-    res.clearCookie("refreshToken");
+    res.clearCookie("authToken", {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        path: "/user"
+    });
+    res.clearCookie("refreshToken", {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        path: "/",
+    });
     res.status(200).json({ message: "Logged out successfully" });
-})
+});
 
 //Route for profile updation
 router.patch('/profile-update', async (req,res)=>{

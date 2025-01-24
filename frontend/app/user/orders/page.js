@@ -4,6 +4,7 @@ import Navbar from "@/app/components/Navbar";
 export default async function Order() {
     const res = await fetchWithToken(`${process.env.NEXT_PUBLIC_API_BASE_URL}/user/order`, {
         method: 'GET',
+        credentials: "include",
     });
 
     if (!res.ok) {

@@ -9,7 +9,8 @@ export default function Logout(){
         const logout = async () => {
             try{
                 const res = await fetch("/api/proxy/user/logout", {
-                    method: "GET"
+                    method: "GET",
+                    credentials: "include"
                 });
                 if(!res.ok){
                     const errorText = await res.text();
@@ -24,6 +25,7 @@ export default function Logout(){
         };
         logout();
     }, [router]); // Dependency array includes `router`
+
     return <div style={styles.logout}>Logging out...</div>;
 }
 

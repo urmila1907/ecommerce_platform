@@ -5,6 +5,7 @@ export default async function Wishlist() {
     try{
         const res = await fetchWithToken(`${process.env.NEXT_PUBLIC_API_BASE_URL}/user/wishlist`, {
             method: 'GET',
+            credentials: "include",
         });
         if (!res.ok) {
             const errorText = await res.text();

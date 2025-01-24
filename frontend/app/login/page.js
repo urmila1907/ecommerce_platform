@@ -37,6 +37,7 @@ export default function Login(){
 
     const handleSubmit = async (e) =>{
         e.preventDefault();
+
         const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/login`,{
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -46,6 +47,7 @@ export default function Login(){
         if(!res.ok) {
             throw new Error(`HTTP error! Status: ${res.status}`);
         }
+        console.log("Result of login: ", res);
         const result = await res.json();
         router.push("/user/home");
     }
