@@ -26,9 +26,10 @@ export async function fetchWithToken(url, options = {}) {
 
     if (refreshResponse.ok) {
         // Retry the original request
-        token = await getAuthTokenFromCookie();
+        const res = await refreshResponse.json();
+        token = res.token;
         headers.set("Authorization", `Bearer ${token}`);
-        
+
         response = await fetch(url, {
             ...options,
             headers,
@@ -36,7 +37,6 @@ export async function fetchWithToken(url, options = {}) {
         });
     }
   }
-
   return response;
 }
 

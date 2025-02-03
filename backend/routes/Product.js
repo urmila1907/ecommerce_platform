@@ -23,6 +23,23 @@ router.post('/create-product', authenticateToken, async (req,res)=>{
     }
 })
 
+//Route for searching products
+router.get("/search", async(req,res)=>{
+    try{
+        const {query} = req.query;
+        if(!query){
+            return res.status(400).json({message: "Search query is required"});
+        }
+        const products = await Product.find({
+            productName: {$regex: query, $options: "i"}
+        });
+        res.status(200).json({products});
+    }
+    catch(err){
+        res.status(500).json({ message: "Server error", err });
+    }
+});
+
 //Route for updating a product
 router.patch('/:id', authenticateToken, async (req,res)=>{
     const userRole = req.user.role;

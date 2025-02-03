@@ -1,13 +1,26 @@
+"use client";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
+import Search from "./Search";
 
 export default function Navbar({ items }) {
+    const router = useRouter();
+
+    const handleSearch = (query)=>{
+        if(query.trim() != ""){
+            router.push(`/search?query=${query}`);
+        }
+    }
     return (
         <nav style={styles.navbar}>
             <div style={styles.title}>
                 <Image src="/logo.png" alt="App logo" width="30" height="30" />
                 <h1>E-commerce App</h1>
             </div>
+
+            <Search onSearch={handleSearch}/>
+
             <ul style={styles.list}>
                 {items.map((item) => (
                     <li key={item.name}>
@@ -30,6 +43,8 @@ const styles = {
         backgroundColor: "#4A90E2",  // Soft blue background for the navbar
         color: "#FFFFFF",  // White text for better contrast
         boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",  // Soft shadow for depth
+        overflowX: "auto", /* Enables horizontal scroll */
+        whiteSpace: "nowrap"
     },
     title: {
         display: "flex",

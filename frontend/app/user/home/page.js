@@ -1,5 +1,7 @@
 import Navbar from "@/app/components/Navbar";
 import {fetchWithToken} from "@/utils/fetchWithToken";
+import About from "@/app/components/About";
+import Contact from "@/app/components/Contact"; 
 
 export default async function Home(){
     try{
@@ -18,24 +20,35 @@ export default async function Home(){
 
         return (
             <div>
-                <Navbar items={[{name: "Home", url: "/user/home"},
-                    {name: "My Orders", url: "/user/orders"},
-                    {name: "Wishlist", url: "/user/wishlist"},
-                    {name: "Cart", url: "/user/cart"},
-                    {name: "Log out", url: "/user/logout"},
-                    ]}
-                />
-                
-                <div style={styles.products}>
-                    {products.map((product) => (
-                        <div key={product._id} style={styles.product}>
-                            <h3 style={styles.productName}>{product.productName}</h3>
-                            <h4 style={styles.productDescription}>{product.description}</h4>
-                            <h5 style={styles.productPrice}>Price: ₹{product.price}</h5>
-                            <h5 style={styles.productQuantity}>Available: {product.quantity}</h5>
-                        </div>
-                    ))}
-                </div>
+                <main>
+                    <Navbar items={[{name: "Home", url: "/user/home"},
+                        {name: "My Orders", url: "/user/orders"},
+                        {name: "Wishlist", url: "/user/wishlist"},
+                        {name: "Cart", url: "/user/cart"},
+                        {name: "About", url: "#about"},
+                        {name: "Contact us", url: "#contact"},
+                        {name: "Log out", url: "/user/logout"},
+                        ]}
+                    />
+                    
+                    <div style={styles.products}>
+                        {products.map((product) => (
+                            <div key={product._id} style={styles.product}>
+                                <h3 style={styles.productName}>{product.productName}</h3>
+                                <h4 style={styles.productDescription}>{product.description}</h4>
+                                <h5 style={styles.productPrice}>Price: ₹{product.price}</h5>
+                                <h5 style={styles.productQuantity}>Available: {product.quantity}</h5>
+                            </div>
+                        ))}
+                    </div>
+                </main>
+                <section id="about" style={styles.section}>
+                    <About />
+                </section>
+
+                <section id="contact" style={styles.section}>
+                    <Contact /> 
+                </section>
             </div>
         );
     }catch (err) {
@@ -45,6 +58,13 @@ export default async function Home(){
 }
 
 const styles = {
+    main: {
+        scrollBehavior: "smooth", 
+        height: "100%",
+    },
+    section: {
+        padding: "1rem"
+    },
     products: {
         display: "flex",
         flexWrap: "wrap",
