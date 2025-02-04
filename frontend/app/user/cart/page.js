@@ -1,6 +1,5 @@
 "use client";
 import { useState, useEffect } from "react";
-import Navbar from "@/app/components/Navbar";
 import { CiCircleMinus, CiCirclePlus  } from "react-icons/ci";
 
 export default function Cart(){
@@ -79,13 +78,6 @@ export default function Cart(){
 
     return (
         <div>
-            <Navbar items={[{name: "Home", url: "/user/home"},
-                                        {name: "My Orders", url: "/user/orders"},
-                                        {name: "Wishlist", url: "/user/wishlist"},
-                                        {name: "Cart", url: "/user/cart"},
-                                        {name: "Log out", url: "/user/logout"},
-                            ]} 
-            />
             {isLoading == true ? <>
                 <div style={styles.loading}>Loading cart details...</div>
             </> : 

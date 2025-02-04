@@ -1,0 +1,66 @@
+.products {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-evenly;
+    align-items: flex-start;
+    gap: 2rem;
+    padding: 1rem;
+    background-color: #F1F5F9; /* Light grayish background */
+}
+
+.product {
+    padding: 1.5rem;
+    background-color: #FFFFFF; /* White background for products */
+    color: #2D3748; /* Dark text for better contrast */
+    border-radius: 10px;
+    width: 260px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+    cursor: pointer;
+}
+
+.productName {
+    font-size: 1.5rem;
+    font-weight: 600; /* Slightly less bold for a cleaner look */
+    color: #4A90E2; /* Soft blue for product name */
+    margin-bottom: 0.5rem;
+}
+
+.productDescription {
+    font-size: 1.1rem;
+    color: #6B7280; /* Soft gray for the description text */
+    margin-bottom: 1rem;
+}
+
+.productPrice {
+    font-size: 1.2rem;
+    font-weight: 700; /* Bold for price to make it stand out */
+    color: #FF6F61; /* Soft red-orange for price */
+    margin-bottom: 0.5rem;
+}
+
+.productQuantity {
+    font-size: 1rem;
+    color: #38A169; /* Green for available quantity */
+}
+
+.error {
+    color: #D9534F; /* Red color for error messages */
+    text-align: center;
+    padding: 2rem;
+    font-size: 1.2rem;
+    font-weight: bold;
+}
+
+.noProducts {
+    color: #A0AEC0; /* Light gray for 'no products' message */
+    text-align: center;
+    padding: 2rem;
+    font-size: 1.2rem;
+}
+
+.header {
+    color: #000; /* Light gray for 'no products' message */
+    padding: 1rem;
+    font-size: 1.6rem;
+}

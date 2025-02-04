@@ -1,5 +1,4 @@
 import { fetchWithToken } from "@/utils/fetchWithToken";
-import Navbar from "@/app/components/Navbar";
 
 export default async function Order() {
     const res = await fetchWithToken(`${process.env.NEXT_PUBLIC_API_BASE_URL}/user/order`, {
@@ -21,13 +20,6 @@ export default async function Order() {
 
     return (
         <div>
-            <Navbar items={[{name: "Home", url: "/user/home"},
-                            {name: "My Orders", url: "/user/orders"},
-                            {name: "Wishlist", url: "/user/wishlist"},
-                            {name: "Cart", url: "/user/cart"},
-                            {name: "Log out", url: "/user/logout"},
-                            ]} 
-            />
             <div style={styles.ordersList}>
                 {orders.map((order) => (
                     <div key={order._id} style={styles.orderCard}>

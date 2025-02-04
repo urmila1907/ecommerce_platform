@@ -1,11 +1,13 @@
 "use client";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import Search from "./Search";
 
-export default function Navbar({ items }) {
+export default function Navbar({ isLoggedIn }) {
+    const pathname = usePathname();
     const router = useRouter();
+    if (pathname === "/login" || pathname === "/register") return null;
 
     const handleSearch = (query)=>{
         if(query.trim() != ""){
@@ -22,13 +24,48 @@ export default function Navbar({ items }) {
             <Search onSearch={handleSearch}/>
 
             <ul style={styles.list}>
-                {items.map((item) => (
-                    <li key={item.name}>
-                        <Link href={item.url} style={styles.link}>
-                            {item.name}
-                        </Link>
+                {isLoggedIn ? (
+                    <li>
+                    <Link href="/user/home" style={styles.link}>Home</Link>
+                </li>
+                ) : (
+                    <li>
+                        <Link href="/" style={styles.link}>Home</Link>
                     </li>
-                ))}
+                )}
+                
+                <li>
+                    <Link href="/products" style={styles.link}>Products</Link>
+                </li>
+
+                {isLoggedIn ? (
+                    <>
+                        <li>
+                            <Link href="/user/orders" style={styles.link}>My Orders</Link>
+                        </li>
+                        <li>
+                            <Link href="/user/wishlist" style={styles.link}>Wishlist</Link>
+                        </li>
+                        <li>
+                            <Link href="/user/cart" style={styles.link}>My Cart</Link>
+                        </li>
+                        <li>
+                            <Link href="/user/profile" style={styles.link}>Profile</Link>
+                        </li>
+                        <li>
+                            <Link href="/user/logout" style={styles.link}>Log out</Link>
+                        </li>
+                    </>
+                ) : (
+                    <>
+                        <li>
+                            <Link href="/login" style={styles.link}>Login</Link>
+                        </li>
+                        <li>
+                            <Link href="/register" style={styles.link}>Register</Link>
+                        </li>
+                    </>
+                )}
             </ul>
         </nav>
     );
@@ -65,5 +102,5 @@ const styles = {
     },
     linkHover: {
         color: "#FF6F61",  // Red-orange color for the hover effect
-    }
+    },
 }
