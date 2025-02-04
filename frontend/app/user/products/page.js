@@ -1,8 +1,8 @@
 "use client";
-import "../styles/page.css";
+import "@/app/styles/page.css";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { useAuth } from "../context/authContext";
+import { useAuth } from "@/app/context/authContext";
 
 export default function Products(){
     const router = useRouter();
@@ -43,7 +43,6 @@ export default function Products(){
         try{
             const res = await fetch(`/api/proxy/user/wishlist/:${id}`, {
                 method: "POST",
-                credentials: "include"
             });
             if (!res.ok) {
                 const errorText = await res.text();

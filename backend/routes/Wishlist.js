@@ -10,9 +10,9 @@ const Wishlist = require("../models/Wishlist");
 const isValidObjectId = (id) => mongoose.Types.ObjectId.isValid(id);
 
 //Router for adding a product to the wishlist
-router.post('/', asyncHandler(async (req,res)=>{
+router.post('/:id', asyncHandler(async (req,res)=>{
     const userId = req.user.id;
-    const {product} = req.body;
+    const product = req.params.id;
 
     //Checking if product ID is valid
     if(!isValidObjectId(product)){

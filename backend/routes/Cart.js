@@ -101,7 +101,7 @@ router.patch('/increase/:id', asyncHandler(async (req,res) => {
         {$set : {'products.$.quantity' : existingProduct.quantity + 1},
         $inc: {totalNoOfProducts: 1, totalCost: (existingProduct.price)}},
         {new: true, runValidators: true,});
-    return res.status(200).send(newCartExistingProduct);
+    return res.status(200).json({newCartExistingProduct});
 }));
 
 //Router for decreasing quantity of a product in cart
@@ -129,7 +129,7 @@ router.patch('/decrease/:id', asyncHandler(async (req,res) => {
         {$set : {'products.$.quantity' : existingProduct.quantity - 1},
         $inc: {totalNoOfProducts: -1, totalCost: ((-1) *existingProduct.price)}},
         {new: true, runValidators: true,});
-    return res.status(200).send(newCartExistingProduct);
+    return res.status(200).json({newCartExistingProduct});
 }));
 
 

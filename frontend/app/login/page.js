@@ -4,8 +4,11 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {FaEyeSlash, FaEye} from "react-icons/fa";
+import { useAuth } from "../context/authContext";
 
 export default function Login(){
+    const { setIsUser } = useAuth();
+
     const [formData, setFormData] = useState({
         userName: "",
         password: "",
@@ -37,17 +40,23 @@ export default function Login(){
 
     const handleSubmit = async (e) =>{
         e.preventDefault();
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/login`,{
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(formData),
-            credentials: "include",
-        });
-        if(!res.ok) {
-            throw new Error(`HTTP error! Status: ${res.status}`);
+
+        try{
+            const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/login`,{
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(formData),
+                credentials: "include",
+            });
+            if(!res.ok) {
+                throw new Error(`HTTP error! Status: ${res.status}`);
+            }
+            const result = await res.json();
+            setIsUser(true);
+            router.push("/user/home");
+        }catch(err){
+            console.error("Error while logging in", err);
         }
-        const result = await res.json();
-        router.push("/user/home");
     }
     return (
         <div style={styles.container}>

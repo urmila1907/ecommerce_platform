@@ -1,112 +1,120 @@
 "use client";
 import { useState, useEffect } from "react";
-import Navbar from "@/app/components/Navbar";
 import { CiCircleMinus, CiCirclePlus  } from "react-icons/ci";
 
 export default function Cart(){
-        const [cart, setCart] = useState(null);
-        const [error, setError] = useState(null);
+    const [cart, setCart] = useState(null);
+    const [error, setError] = useState(null);
+    const [isLoading, setIsLoading] = useState(true);
 
-        useEffect(() => {
-            const fetchCart = async () => {
-                try {
-                    const res = await fetch("/api/proxy/user/cart", {
-                        method: "GET",
-                    });
+    const fetchCart = async () => {
+        setIsLoading(true);
+        try {
+            const res = await fetch("/api/proxy/user/cart", {
+                method: "GET",
+                credentials: "include"
+            });
 
-                    if (!res.ok) {
-                        const errorText = await res.text();
-                        setError(errorText);
-                        return;
-                    }
-
-                    const data = await res.json();
-                    setCart(data.userCart);
-
-                } catch (err) {
-                    console.error("Error fetching cart:", err);
-                    setError("Server error while fetching cart details");
-                }
-            };
-            fetchCart();
-        }, []); // Empty dependency array to run only once
-
-        const handleMinus = async (id) => {
-            try {
-                const res = await fetch(`/api/proxy/user/cart/decrease/${id}`, {
-                            method: "PATCH",
-                            });
-                if (!res.ok) {
-                    const errorText = await res.text();
-                    setError(errorText);
-                    return;
-                }
-                const data = await res.json();
-                setCart(data.userCart); // Update cart state
-            } catch (err) {
-                console.error("Error decreasing quantity:", err);
-                setError("Failed to decrease product quantity");
+            if (!res.ok) {
+                const errorText = await res.text();
+                setError(errorText);
+                setIsLoading(false);
+                return;
             }
-        };
-    
-        const handlePlus = async (id) => {
-            try {
-                const res = await fetch(`/api/proxy/user/cart/increase/${id}`, {
-                    method: "PATCH",
-                    });
-                if (!res.ok) {
-                    const errorText = await res.text();
-                    setError(errorText);
-                    return;
-                }
-                const data = await res.json();
-                setCart(data.userCart); // Update cart state
-            } catch (err) {
-                console.error("Error increasing quantity:", err);
-                setError("Failed to increase product quantity");
+
+            const data = await res.json();
+            setCart(data.userCart);
+            setIsLoading(false);
+
+        } catch (err) {
+            console.error("Error fetching cart:", err);
+            setError("Server error while fetching cart details");
+            setIsLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchCart();
+    }, []);
+
+    const handleMinus = async (id) => {
+        try {
+            const res = await fetch(`/api/proxy/user/cart/decrease/${id}`, {
+                        method: "PATCH",
+                        credentials: "include"
+                        });
+            if (!res.ok) {
+                const errorText = await res.text();
+                setError(errorText);
+                return;
             }
-        };
-    
-        if (error) {
-            return <div style={styles.error}>{error}</div>;
+            const data = await res.json();
+            await fetchCart();
+        } catch (err) {
+            console.error("Error decreasing quantity:", err);
+            setError("Failed to decrease product quantity");
         }
-    
-        if (!cart) {
-            return <div style={styles.loading}>Loading cart details...</div>;
+    };
+
+    const handlePlus = async (id) => {
+        try {
+            const res = await fetch(`/api/proxy/user/cart/increase/${id}`, {
+                method: "PATCH",
+                credentials: "include"
+                });
+            if (!res.ok) {
+                const errorText = await res.text();
+                setError(errorText);
+                return;
+            }
+            const data = await res.json();
+            await fetchCart();
+        } catch (err) {
+            console.error("Error increasing quantity:", err);
+            setError("Failed to increase product quantity");
         }
+    };
 
-        return (
-            <div>
-                <Navbar items={[{name: "Home", url: "/user/home"},
-                                            {name: "My Orders", url: "/user/orders"},
-                                            {name: "Wishlist", url: "/user/wishlist"},
-                                            {name: "Cart", url: "/user/cart"},
-                                            {name: "Log out", url: "/user/logout"},
-                                ]} 
-                />
+    if (error) {
+        return <div style={styles.error}>{error}</div>;
+    }
 
-                <div style={styles.cartContainer}>
-                    <div style={styles.cartProducts}>
-                        {cart.products.map((product) => (
-                            <div key={product._id} style={styles.productDetails}>
-                                <h3 style={styles.productName}>{product.product.productName}</h3>
-                                <p style={styles.productDesc}>{product.product.description}</p>
-                                <div style={styles.quantityDetails}>
-                                    <button onClick={() => handleMinus(product._id)} style={styles.minusBtn}><CiCircleMinus/></button>
-                                    <p style={styles.productQty}>Qty: {product.quantity}</p>
-                                    <button onClick={() => handlePlus(product._id)} style={styles.plusBtn}><CiCirclePlus/></button>
+    return (
+        <div>
+            {isLoading == true ? <>
+                <div style={styles.loading}>Loading cart details...</div>
+            </> : 
+            <>
+                {cart && cart.products.length > 0 ? 
+                <>
+                    <div style={styles.cartContainer}>
+                        <div style={styles.cartProducts}>
+                            {cart.products.map((product) => (
+                                <div key={product._id} style={styles.productDetails}>
+                                    <h3 style={styles.productName}>{product.product.productName}</h3>
+                                    <p style={styles.productDesc}>{product.product.description}</p>
+                                    <div style={styles.quantityDetails}>
+                                        <button onClick={() => handleMinus(product.product._id)} style={styles.minusBtn}><CiCircleMinus/></button>
+                                        <p style={styles.productQty}>Qty: {product.quantity}</p>
+                                        <button onClick={() => handlePlus(product.product._id)} style={styles.plusBtn}><CiCirclePlus/></button>
+                                    </div>
+                                    <p style={styles.productPrice}>Amount: ₹{product.price}</p>
                                 </div>
-                                <p style={styles.productPrice}>Amount: ₹{product.price}</p>
-                            </div>
-                        ))}
-                    </div>
+                            ))}
+                        </div>
                     <div style={styles.amountDetails}>
                         <h3 style={styles.totalAmount}>Total Amount: ₹{cart.totalCost}</h3>
                         <button style={styles.orderBtn}>Place Order</button>
                     </div>
-                </div>
-            </div>
-        )
+                    </div>
+                </> :
+                <>
+                    <div style={styles.noProducts}>Do some shopping!</div>
+                </> 
+                }
+                </>}
+        </div>
+    )
 }
 
 const styles = {
@@ -127,6 +135,18 @@ const styles = {
         flexWrap: "wrap",
         flexDirection: "column",
         gap: "1.5rem",
+    },
+    noProducts: {
+        color: "#4A90E2",
+        fontSize: "2rem",
+        textAlign: "center",
+        margin: "2rem"
+    },
+    loading: {
+        color: "#4A90E2",
+        fontSize: "2rem",
+        textAlign: "center",
+        margin: "2rem"
     },
     productDetails: {
         backgroundColor: "#F1F5F9",

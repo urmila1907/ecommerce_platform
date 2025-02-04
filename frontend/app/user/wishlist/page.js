@@ -1,10 +1,10 @@
 import { fetchWithToken } from "@/utils/fetchWithToken";
-import Navbar from "@/app/components/Navbar";
 
 export default async function Wishlist() {
     try{
         const res = await fetchWithToken(`${process.env.NEXT_PUBLIC_API_BASE_URL}/user/wishlist`, {
             method: 'GET',
+            credentials: "include",
         });
         if (!res.ok) {
             const errorText = await res.text();
@@ -15,13 +15,6 @@ export default async function Wishlist() {
     
         return (
             <div>
-                <Navbar items={[{name: "Home", url: "/user/home"},
-                                {name: "My Orders", url: "/user/orders"},
-                                {name: "Wishlist", url: "/user/wishlist"},
-                                {name: "Cart", url: "/user/cart"},
-                                {name: "Log out", url: "/user/logout"},
-                                ]} 
-                />
                 <div style={styles.productsList}>
                     {wishlist.map((product) =>(
                         <div key={product._id} style={styles.productDetails}>

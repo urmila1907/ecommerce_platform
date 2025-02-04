@@ -20,7 +20,7 @@ function authenticateToken(req, res, next) {
         next();
     } catch (err) {
         console.error("Token verification failed:", err.message);
-        return res.status(401).send("Unauthorized: Invalid token");
+        return res.status(401).json({msg: "Unauthorized: Invalid token"});
     }
 }
 
