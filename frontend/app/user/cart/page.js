@@ -12,6 +12,7 @@ export default function Cart(){
         try {
             const res = await fetch("/api/proxy/user/cart", {
                 method: "GET",
+                credentials: "include"
             });
 
             if (!res.ok) {
@@ -40,6 +41,7 @@ export default function Cart(){
         try {
             const res = await fetch(`/api/proxy/user/cart/decrease/${id}`, {
                         method: "PATCH",
+                        credentials: "include"
                         });
             if (!res.ok) {
                 const errorText = await res.text();
@@ -58,6 +60,7 @@ export default function Cart(){
         try {
             const res = await fetch(`/api/proxy/user/cart/increase/${id}`, {
                 method: "PATCH",
+                credentials: "include"
                 });
             if (!res.ok) {
                 const errorText = await res.text();

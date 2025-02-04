@@ -42,12 +42,11 @@ router.get('/profile', (req,res)=>{
 
 //Route for logout
 router.get('/logout', async (req,res)=>{
-
     res.clearCookie("authToken", {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
         sameSite: 'lax',
-        path: "/user"
+        path: "/"
     });
     res.clearCookie("refreshToken", {
         httpOnly: true,

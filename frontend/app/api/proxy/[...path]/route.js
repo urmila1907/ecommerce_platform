@@ -6,6 +6,7 @@ async function forwardRequest(apiUrl, method, headers, body = null) {
     const options = {
       method,
       headers,
+      credentials: "include",  
     };
 
     if (body) {
@@ -82,7 +83,7 @@ export async function proxyHandler(req) {
     apiUrl,
     req.method,
     headers,
-    req.method === "PATCH" ? await req.json() : null
+    (req.method === "PATCH" || req.method === "POST") ? await req.json() : null,
   );
 
   if (error) {
@@ -91,12 +92,18 @@ export async function proxyHandler(req) {
     });
   }
 
+  const setCookie = response.headers.get("set-cookie");
+  const responseHeaders = new Headers();
+  if (setCookie) {
+    responseHeaders.append("set-cookie", setCookie);
+  }
   return new Response(JSON.stringify(data), {
     status: response.status,
+    headers: responseHeaders,
   });
 }
 
-// Export the specific handlers for GET and PATCH
+// Export the specific handlers for GET, PATCH, POST and DELETE
 export async function GET(req) {
   return proxyHandler(req);
 }
@@ -104,3 +111,12 @@ export async function GET(req) {
 export async function PATCH(req) {
   return proxyHandler(req);
 }
+
+export async function POST(req) {
+  return proxyHandler(req);
+}
+
+export async function DELETE(req) {
+  return proxyHandler(req);
+}
+

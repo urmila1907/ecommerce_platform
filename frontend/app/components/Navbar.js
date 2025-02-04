@@ -1,19 +1,23 @@
 "use client";
-import { useRouter, usePathname } from "next/navigation";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import Search from "./Search";
+import { useAuth } from "../context/authContext";
 
-export default function Navbar({ isLoggedIn }) {
-    const pathname = usePathname();
+export default function Navbar() {
+    const {isUser, loading} = useAuth();
     const router = useRouter();
-    if (pathname === "/login" || pathname === "/register") return null;
 
     const handleSearch = (query)=>{
         if(query.trim() != ""){
             router.push(`/search?query=${query}`);
         }
     }
+    if(loading){
+        return <div>Loading...</div>;
+    }
+
     return (
         <nav style={styles.navbar}>
             <div style={styles.title}>
@@ -24,22 +28,14 @@ export default function Navbar({ isLoggedIn }) {
             <Search onSearch={handleSearch}/>
 
             <ul style={styles.list}>
-                {isLoggedIn ? (
-                    <li>
-                    <Link href="/user/home" style={styles.link}>Home</Link>
-                </li>
-                ) : (
-                    <li>
-                        <Link href="/" style={styles.link}>Home</Link>
-                    </li>
-                )}
-                
-                <li>
-                    <Link href="/products" style={styles.link}>Products</Link>
-                </li>
-
-                {isLoggedIn ? (
+                {isUser ? (
                     <>
+                        <li>
+                            <Link href="/user/home" style={styles.link}>Home</Link>
+                        </li>
+                        <li>
+                            <Link href="/user/products" style={styles.link}>Products</Link>
+                        </li>
                         <li>
                             <Link href="/user/orders" style={styles.link}>My Orders</Link>
                         </li>
@@ -59,6 +55,12 @@ export default function Navbar({ isLoggedIn }) {
                 ) : (
                     <>
                         <li>
+                            <Link href="/home" style={styles.link}>Home</Link>
+                        </li>
+                        <li>
+                            <Link href="/products" style={styles.link}>Products</Link>
+                        </li>
+                        <li>
                             <Link href="/login" style={styles.link}>Login</Link>
                         </li>
                         <li>
@@ -76,12 +78,17 @@ const styles = {
         display: "flex",
         justifyContent: "space-between",
         alignItems: "center",
-        padding: "1rem 2rem",
+        padding: "0.8rem 2rem",
         backgroundColor: "#4A90E2",  // Soft blue background for the navbar
         color: "#FFFFFF",  // White text for better contrast
         boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",  // Soft shadow for depth
         overflowX: "auto", /* Enables horizontal scroll */
-        whiteSpace: "nowrap"
+        whiteSpace: "nowrap",
+        position: "fixed", 
+        width: "100%", 
+        top: 0,
+        left: 0,
+        zIndex: 1000
     },
     title: {
         display: "flex",

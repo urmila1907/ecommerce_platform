@@ -32,7 +32,7 @@ const About = () => {
         <li>Quality products with a satisfaction guarantee</li>
       </ul>
       <div style={styles.cta}>
-        <a href="#products" style={styles.ctaButton}>Shop Now</a>
+        <a href="/products" style={styles.ctaButton}>Shop Now</a>
       </div>
     </div>
   );

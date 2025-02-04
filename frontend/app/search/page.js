@@ -20,7 +20,9 @@ export default function SearchProducts(){
     const fetchProducts = async (query) =>{
         setLoading(true);
         try{
-            const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/product/search?query=${query}`);
+            const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/product/search?query=${query}`,{
+                credentials: "include"
+            });
             const data = await res.json();
             setProducts(data.products);
         }

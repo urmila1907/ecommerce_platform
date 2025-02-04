@@ -4,6 +4,7 @@ export default async function Home(){
     try{
         const res = await fetchWithToken(`${process.env.NEXT_PUBLIC_API_BASE_URL}/user/`, {
             method: 'GET',
+            credentials: "include"
         });
 
         if (!res.ok) {
