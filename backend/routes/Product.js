@@ -116,7 +116,7 @@ router.get('/', async (req,res)=>{
 
         //If no products exist
         if(products.length == 0) {
-            return res.status(404).send("No products exist!");
+            return res.status(404).json({msg: "No products exist!"});
         };
         
         res.status(200).json({
@@ -127,7 +127,7 @@ router.get('/', async (req,res)=>{
         });
     }
     catch(err){
-        res.status(500).send("Server error: " + err.message);
+        res.status(500).json({msg: "Server error: " + err.message});
     }
 });
 

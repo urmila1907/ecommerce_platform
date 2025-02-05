@@ -7,7 +7,7 @@ export default function ClientLayout({ children }) {
   const noNavbarPages = ["/login", "/register"];
   
   return (
-    <div style={{ paddingTop: noNavbarPages.includes(pathname) ? "0" : "4.3rem" }}>
+    <div style={{ paddingTop: noNavbarPages.includes(pathname) ? "0" : "4.3rem", height: "100vh" }}>
       {!(noNavbarPages.includes(pathname)) && <Navbar />}
       {children}
     </div>

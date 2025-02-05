@@ -16,11 +16,11 @@ router.post('/:id', asyncHandler(async (req,res)=>{
 
     //Checking if product ID is valid
     if(!isValidObjectId(product)){
-        return res.status(400).send("Invalid product ID!");
+        return res.status(400).json({msg: "Invalid product ID!"});
     }
 
     const productExist = await Product.findById(product);
-    if(!productExist) return res.status(404).send("No such product exists!");
+    if(!productExist) return res.status(404).json({msg: "No such product exists!"});
 
     const productDetails = {
         product: product,
@@ -30,7 +30,7 @@ router.post('/:id', asyncHandler(async (req,res)=>{
     //If the product already exists in the wishlist
     const existProduct = await Wishlist.findOne({customer: userId, 'products.product': product});
     if(existProduct){
-        return res.status(400).send("Product is already added to the wishlist!");
+        return res.status(400).json({msg: "Product is already added to the wishlist!"});
     };
 
     //If the product isn't already present in the wishlist
@@ -38,7 +38,7 @@ router.post('/:id', asyncHandler(async (req,res)=>{
                                 {$push : {products : productDetails}, 
                                 $inc: {totalNoOfProducts: 1}},
                                 {new: true, upsert: true, runValidators: true});
-    res.status(200).send(newWishlist);
+    res.status(200).json({newWishlist});
 }));
 
 //Router for removing a product from the wishlist
@@ -64,7 +64,7 @@ router.delete('/:id', asyncHandler(async (req,res)=>{
 router.get('/', asyncHandler(async (req,res)=>{
     const userWishlist = await Wishlist.findOne({customer : req.user.id}).populate('products.product');
     if(userWishlist == null || userWishlist.products.length == 0) {
-        return res.status(200).send("Cart is empty.");
+        return res.status(200).send("Wishlist is empty.");
     }
     res.status(200).json({products: userWishlist.products});
 }));

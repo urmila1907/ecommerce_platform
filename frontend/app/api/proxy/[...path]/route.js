@@ -12,10 +12,11 @@ async function forwardRequest(apiUrl, method, headers, body = null) {
     if (body) {
       options.body = JSON.stringify(body);
     }
-
     const response = await fetch(apiUrl, options);
+    const setCookie = response.headers.get("set-cookie");
     const data = await response.json();
-    return { response, data };
+
+    return { response, data, setCookie};
   } catch (error) {
     console.error("Error in proxy route:", error);
     return { error: "Internal Server Error" };
@@ -26,9 +27,14 @@ async function forwardRequest(apiUrl, method, headers, body = null) {
 async function refreshToken() {
   try {
     const cookie = await cookies();
-    let token = cookie.get("refreshToken")?.value;
+    let refreshToken = cookie.get("refreshToken")?.value;
+    if (!refreshToken) {
+      console.error("No refresh token available.");
+      return null;
+    }
+
     const headers = {
-      Authorization: `Bearer ${token}`,
+      Authorization: `Bearer ${refreshToken}`,
       "Content-Type": "application/json",
     };
 
@@ -56,43 +62,44 @@ export async function proxyHandler(req) {
   let cookie = await cookies();
   let token = cookie.get("authToken")?.value;
 
-  // Extract dynamic path and API URL
-  const path = req.nextUrl.pathname.replace("/api/proxy", ""); // Remove `/api/proxy`
+  const path = req.nextUrl.pathname.replace("/api/proxy", "");
   const apiUrl = `${process.env.NEXT_PUBLIC_API_BASE_URL}${path}`;
 
-  // Define headers for the request
-  const headers = {
-    Authorization: `Bearer ${token}`,
-    "Content-Type": req.headers.get("content-type") || "application/json",
-  };
-
-  // Handle cases where the token is missing or invalid
   if (!token) {
     token = await refreshToken();
-
     if (!token) {
       return new Response(JSON.stringify({ error: "Failed to refresh token" }), {
         status: 401,
       });
     }
-    headers.Authorization = `Bearer ${token}`;
   }
 
-  // Forward the request based on the method
-  const { response, data, error } = await forwardRequest(
+  const headers = {
+    Authorization: `Bearer ${token}`,
+    "Content-Type": req.headers.get("content-type") || "application/json",
+  };
+
+  let body = null;
+
+  if (req.method === "PATCH" || req.method === "POST") {
+      try {
+          const text = await req.text(); // Read raw text
+          body = text ? JSON.parse(text) : null; // Parse only if non-empty
+      } catch (error) {
+          console.error("Error parsing JSON:", error);
+          return new Response(JSON.stringify({ error: "Invalid JSON format" }), {
+              status: 400,
+          });
+      }
+  }
+
+  const { response, data, setCookie } = await forwardRequest(
     apiUrl,
     req.method,
     headers,
-    (req.method === "PATCH" || req.method === "POST") ? await req.json() : null,
+    body
   );
 
-  if (error) {
-    return new Response(JSON.stringify({ error }), {
-      status: 500,
-    });
-  }
-
-  const setCookie = response.headers.get("set-cookie");
   const responseHeaders = new Headers();
   if (setCookie) {
     responseHeaders.append("set-cookie", setCookie);
