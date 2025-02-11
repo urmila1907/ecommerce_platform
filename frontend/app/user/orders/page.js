@@ -1,18 +1,24 @@
 import { fetchWithToken } from "@/utils/fetchWithToken";
 
 export default async function Order() {
-    const res = await fetchWithToken(`${process.env.NEXT_PUBLIC_API_BASE_URL}/user/order`, {
-        method: 'GET',
-        credentials: "include",
-    });
+    let orders = [];
 
-    if (!res.ok) {
-        const errorText = await res.text();
-        return <div style={styles.error}>Failed to fetch order details: {errorText}</div>;
+    try {
+        const res = await fetchWithToken(`${process.env.NEXT_PUBLIC_API_BASE_URL}/user/order`, {
+            method: "GET",
+            credentials: "include",
+        });
+
+        if (!res.ok) {
+            throw new Error(await res.text());
+        }
+
+        const data = await res.json();
+        orders = data.orderDetails || [];
+    } catch (err) {
+        console.error("Failed to fetch order details: ", err);
+        return <div style={styles.error}>Failed to fetch order details</div>;
     }
-
-    const data = await res.json();
-    const orders = data.orderDetails;
 
     if (orders.length === 0) {
         return <div style={styles.noOrders}>Do some shopping!</div>;
@@ -23,7 +29,6 @@ export default async function Order() {
             <div style={styles.ordersList}>
                 {orders.map((order) => (
                     <div key={order._id} style={styles.orderCard}>
-
                         {/* Product Details */}
                         <div style={styles.productDetails}>
                             <h3 style={styles.productName}>{order.product.productName}</h3>

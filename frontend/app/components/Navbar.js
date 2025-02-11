@@ -55,7 +55,7 @@ export default function Navbar() {
                 ) : (
                     <>
                         <li>
-                            <Link href="/home" style={styles.link}>Home</Link>
+                            <Link href="/" style={styles.link}>Home</Link>
                         </li>
                         <li>
                             <Link href="/products" style={styles.link}>Products</Link>

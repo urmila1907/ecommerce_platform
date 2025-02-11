@@ -4,7 +4,7 @@ const jwt = require('jsonwebtoken');
 
 router.get('/', async (req, res) => {
     const authHeader = req.headers.authorization;
-    
+    console.log(req.cookies);
     if (!authHeader) {
         return res.status(401).json({ error: 'Authorization header is missing' });
     }
@@ -31,7 +31,7 @@ router.get('/', async (req, res) => {
             secure: process.env.NODE_ENV === 'production',
             sameSite: 'lax',
             maxAge: 3600000, // 1 hour,
-            path: "/user"
+            path: "/"
         });
         res.cookie("refreshToken", newRefreshToken, {
             httpOnly: true,
