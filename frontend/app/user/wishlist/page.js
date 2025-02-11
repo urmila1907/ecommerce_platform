@@ -1,4 +1,5 @@
 import { fetchWithToken } from "@/utils/fetchWithToken";
+import Link from "next/link";
 
 export default async function Wishlist() {
     try{
@@ -12,6 +13,12 @@ export default async function Wishlist() {
         }
         const data = await res.json();
         const wishlist = data.products;
+        if(wishlist == null || wishlist.length == 0){
+            return <div style={styles.emptyContainer}>
+                <h1 style={styles.empty}>Wishlist is empty!</h1>
+                <Link style={styles.emptyProduct} href="/user/products">Explore the products!</Link>
+            </div>
+        };
     
         return (
             <div>
@@ -72,4 +79,18 @@ const styles = {
         color: "#4A90E2",  // Soft blue for product name
         marginBottom: "0.5rem",
     },
+    emptyContainer: {
+        display: "flex",
+        gap: "1.2rem",
+        alignItems: "center",
+        justifyContent: "center",
+        margin: "2rem",
+        color: "#4A90E2",
+        textAlign: "center",
+        flexDirection: "column"
+    },
+    empty: {
+        fontSize: "1.5rem",
+        fontWeight: "600",
+    }
 }

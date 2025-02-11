@@ -10,23 +10,25 @@ const Product = require("../models/Product");
 const isValidObjectId = (id) => mongoose.Types.ObjectId.isValid(id);
 
 //Router for adding a product to the cart
-router.post('/', asyncHandler(async (req,res)=>{
+router.post('/:id', asyncHandler(async (req,res)=>{
     const userId = req.user.id;
-    const {product, quantity} = req.body;
+    const product = req.params.id;
+    const {quantity} = req.body;
+    if(quantity == "" || quantity == null) quantity = 1;
     const newQuantity = Number(quantity);
 
     // Validate that `quantity` is a valid number and greater than 0
     if (isNaN(newQuantity) || newQuantity <= 0) {
-        return res.status(400).send("Quantity must be a positive number.");
+        return res.status(400).json({msg: "Quantity must be a positive number."});
     }
 
     //Checking if product ID is valid
     if(!isValidObjectId(product)){
-        return res.status(400).send("Invalid product ID!");
+        return res.status(400).json({msg: "Invalid product ID!"});
     }
 
     const productExist = await Product.findById(product);
-    if(!productExist) return res.status(404).send("No such product exists!");
+    if(!productExist) return res.status(404).json({msg: "No such product exists!"});
 
     //Adding to the cart
     const productDetails = {
@@ -44,7 +46,7 @@ router.post('/', asyncHandler(async (req,res)=>{
             {$set : {'products.$.quantity' : existingProduct.quantity + newQuantity},
             $inc: {totalNoOfProducts: newQuantity, totalCost: (newQuantity * (productExist.price))}},
             {new: true, runValidators: true,});
-        return res.status(200).send(newCartExistingProduct);
+        return res.status(200).json({newCartExistingProduct});
     }
 
     //If the product isn't already present in the cart
@@ -52,7 +54,7 @@ router.post('/', asyncHandler(async (req,res)=>{
                                 {$push : {products : productDetails}, 
                                 $inc: {totalNoOfProducts: newQuantity, totalCost: (newQuantity * (productExist.price))}},
                                 {new: true, upsert: true, runValidators: true,});
-    res.status(200).send(newCart);
+    res.status(200).json({newCart});
 }));
 
 //Router for removing a product from the cart
@@ -75,6 +77,20 @@ router.delete('/:id', asyncHandler(async (req,res)=>{
     res.status(200).send(newCart);
 }));
 
+//Router for checking if a product is added in cart
+router.get('/:id', asyncHandler(async (req,res)=>{
+    const productId = req.params.id;
+
+    //Checking if product ID is valid
+    if(!isValidObjectId(productId)){
+        return res.status(400).json({msg: "Invalid product ID!"});
+    }
+    const existProduct = await Cart.findOne({customer: req.user.id, 'products.product': productId});
+    if(!existProduct) return res.status(200).json({exist: "false"});
+
+    res.status(200).json({exist: "true"});
+}))
+
 //Router for getting all the products in cart
 router.get('/', asyncHandler(async (req,res)=>{
     const userCart = await Cart.findOne({customer : req.user.id}).populate('products.product');
@@ -90,7 +106,7 @@ router.patch('/increase/:id', asyncHandler(async (req,res) => {
 
     //Checking if product ID is valid
     if(!isValidObjectId(productId)){
-        return res.status(400).send("Invalid product ID!");
+        return res.status(400).json({msg: "Invalid product ID!"});
     }
     const existProduct = await Cart.findOne({customer: req.user.id, 'products.product': productId});
     if(!existProduct) return res.status(404).json({msg : "Product isn't present in the cart"});
@@ -110,7 +126,7 @@ router.patch('/decrease/:id', asyncHandler(async (req,res) => {
 
     //Checking if product ID is valid
     if(!isValidObjectId(productId)){
-        return res.status(400).send("Invalid product ID!");
+        return res.status(400).json({msg: "Invalid product ID!"});
     };
     const existProduct = await Cart.findOne({customer: req.user.id, 'products.product': productId});
     if(!existProduct) return res.status(404).send("Product isn't present in the cart");

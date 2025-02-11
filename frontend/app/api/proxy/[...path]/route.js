@@ -75,22 +75,26 @@ export async function proxyHandler(req) {
   }
 
   const headers = {
-    Authorization: `Bearer ${token}`,
-    "Content-Type": req.headers.get("content-type") || "application/json",
+    Authorization: `Bearer ${token}`
   };
+
+  if (req.headers.get("content-type")) {
+    headers["Content-Type"] = req.headers.get("content-type");
+  }
 
   let body = null;
 
-  if (req.method === "PATCH" || req.method === "POST") {
-      try {
-          const text = await req.text(); // Read raw text
-          body = text ? JSON.parse(text) : null; // Parse only if non-empty
-      } catch (error) {
-          console.error("Error parsing JSON:", error);
-          return new Response(JSON.stringify({ error: "Invalid JSON format" }), {
-              status: 400,
-          });
-      }
+  if (["PATCH", "POST"].includes(req.method)) {
+    try {
+      const text = await req.text();
+      body = text.trim() ? JSON.parse(text) : null;
+    } catch (error) {
+      console.error("Error parsing JSON:", error);
+      return new Response(JSON.stringify({ error: "Invalid JSON format" }), {
+        status: 400,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
   }
 
   const { response, data, setCookie } = await forwardRequest(
@@ -99,7 +103,6 @@ export async function proxyHandler(req) {
     headers,
     body
   );
-
   const responseHeaders = new Headers();
   if (setCookie) {
     responseHeaders.append("set-cookie", setCookie);

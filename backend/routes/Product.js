@@ -49,7 +49,7 @@ router.patch('/:id', authenticateToken, async (req,res)=>{
 
     //Checking if product ID is valid
     if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
-        return res.status(400).send("Invalid product ID!");
+        return res.status(400).json({msg: "Invalid product ID!"});
     }
     try{
         const {productName, price, quantity, description} = req.body;
@@ -76,7 +76,7 @@ router.delete('/:id', authenticateToken, async (req,res)=>{
 
     //Checking if product ID is valid
     if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
-        return res.status(400).send("Invalid product ID!");
+        return res.status(400).json({msg: "Invalid product ID!"});
     }
     try{
         const productExist = await Product.findById(req.params.id);
@@ -95,7 +95,7 @@ router.delete('/:id', authenticateToken, async (req,res)=>{
 router.get('/:id', async (req,res)=>{
     //Checking if product ID is valid
     if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
-        return res.status(400).send("Invalid product ID!");
+        return res.status(400).json({msg: "Invalid product ID!"});
     }
     try{
         const productDetails = await Product.findById(req.params.id);
@@ -103,7 +103,7 @@ router.get('/:id', async (req,res)=>{
         res.status(200).json({productDetails});
     }
     catch(err){
-        res.status(500).send("Server error: " + err.message);
+        res.status(500).json({msg: "Server error: " + err.message});
     }
 });
 

@@ -1,12 +1,14 @@
 "use client";
 import "@/app/styles/page.css";
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { useAuth } from "@/app/context/authContext";
 import { FaRegHeart } from "react-icons/fa6";
 import { FaHeart } from "react-icons/fa";
 
 export default function Products(){
     const {isUser} = useAuth();
+    const router = useRouter();
 
     const [error, setError] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
@@ -35,44 +37,44 @@ export default function Products(){
             setIsLoading(false);
         }
     }
-    
-    const fetchWishlist = async () => {
-        try {
-            if (!isUser) return;
-            const wishlistRes = await fetch("/api/proxy/user/wishlist", {
-                method: "GET",
-                credentials: "include"
-            });
-            if (!wishlistRes.ok) {
-                throw new Error("Failed to fetch products from wishlist");
-            }
-            const wishlistData = await wishlistRes.json();
-            setWishlistProducts(wishlistData.products);
-        } catch (err) {
-            console.error("Error fetching products from wishlist:", err);
-            setError("Server error while fetching products from wishlist");
-        }
-    };
 
     useEffect(() => {
         fetchProducts();
-        if (isUser) {
-            fetchWishlist();
-        }
-    }, [isUser]); 
+
+        const fetchWishlist = async () => {
+            try {
+                if (!isUser) return;
+                const wishlistRes = await fetch("/api/proxy/user/wishlist", {
+                    method: "GET",
+                    credentials: "include"
+                });
+                if (!wishlistRes.ok) {
+                    throw new Error("Failed to fetch products from wishlist");
+                }
+                const wishlistData = await wishlistRes.json();
+                setWishlistProducts(wishlistData.products);
+            } catch (err) {
+                console.error("Error fetching products from wishlist:", err);
+                setError("Server error while fetching products from wishlist");
+            }
+        };
+
+        fetchWishlist();
+    },[isUser]); 
     
     useEffect(() => {
-        if (wishlistProducts.length > 0) {
+        if(!isUser) return;
+        if (wishlistProducts != null && wishlistProducts.length > 0) {
             const newWishlistState = {};
             wishlistProducts.forEach((product) => {
                 newWishlistState[product.product._id] = true;
             });
             setWishlistState(newWishlistState);
         } else {
-            // If wishlistProducts is empty, you might want to clear the state:
+            // If wishlistProducts is empty, clear the state:
             setWishlistState({});
         }
-    }, [wishlistProducts]);     
+    }, [isUser, wishlistProducts]);     
 
     const handleWishlist = async (id)=>{
         try{
@@ -140,6 +142,7 @@ export default function Products(){
                         className="product" 
                         onMouseEnter={() => handleMouseEnter(product._id)}
                         onMouseLeave={handleMouseLeave}
+                        onClick={() => router.push(`/user/product/${product._id}`)}
                     >
                         <h3 className="productName">{product.productName}</h3>
                         <h4 className="productDescription">{product.description}</h4>
@@ -150,7 +153,12 @@ export default function Products(){
                             <div>
                                 {isUser && (
                                     <div style={styles.btnContainer}>
-                                        <button onClick={() => wishlistState[product._id] ? handleRemoveWishlist(product._id) : handleWishlist(product._id)}>
+                                        <button onClick={(e) => {
+                                            e.stopPropagation();
+                                            wishlistState[product._id] 
+                                            ? handleRemoveWishlist(product._id) 
+                                            : handleWishlist(product._id)
+                                        }}>
                                             <div style={styles.btnHeart}>
                                                 {wishlistState[product._id] ? <FaHeart /> : <FaRegHeart />}
                                                 {wishlistState[product._id] ? "Added to Wishlist" : "Add to Wishlist"}	

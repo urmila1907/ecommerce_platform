@@ -28,7 +28,7 @@ mongoose.connect(process.env.MONGO_URI)
 .then(()=> console.log("Connected to database"))
 .catch((err)=> console.error("Database connection error: ", err));
 
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 8000;
 
 app.use('/login', loginRoute);
 app.use('/register', registerRoute);

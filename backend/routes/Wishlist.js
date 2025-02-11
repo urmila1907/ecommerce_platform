@@ -41,6 +41,20 @@ router.post('/:id', asyncHandler(async (req,res)=>{
     res.status(200).json({newWishlist});
 }));
 
+//Router for checking if a product already exists in the wishlist
+router.get('/:id', asyncHandler(async (req,res) =>{
+    const productId = req.params.id;
+
+    //Checking if product ID is valid
+    if(!isValidObjectId(productId)){
+        return res.status(400).json({msg: "Invalid product ID!"});
+    }
+    const existProduct = await Wishlist.findOne({customer: req.user.id, 'products.product': productId});
+    if(!existProduct) return res.status(200).json({exist: "false"});
+
+    res.status(200).json({exist: "true"});
+}))
+
 //Router for removing a product from the wishlist
 router.delete('/:id', asyncHandler(async (req,res)=>{
     const productId = req.params.id;
@@ -50,21 +64,21 @@ router.delete('/:id', asyncHandler(async (req,res)=>{
         return res.status(400).send("Invalid product ID!");
     }
     const existProduct = await Wishlist.findOne({customer: req.user.id, 'products.product': productId});
-    if(!existProduct) return res.status(404).send("Product isn't present in the wishlist");
+    if(!existProduct) return res.status(404).json({msg: "Product isn't present in the wishlist"});
 
     const newWishlist = await Wishlist.findOneAndUpdate({customer: req.user.id, 'products.product': productId},
         {$pull : {products: {product: productId}},
         $inc: {totalNoOfProducts: -1}},
         {new: true, runValidators: true}
     );
-    res.status(200).send(newWishlist);
+    res.status(200).json({newWishlist});
 }));
 
 //Router for getting all the products in wishlist
 router.get('/', asyncHandler(async (req,res)=>{
     const userWishlist = await Wishlist.findOne({customer : req.user.id}).populate('products.product');
     if(userWishlist == null || userWishlist.products.length == 0) {
-        return res.status(200).send("Wishlist is empty.");
+        return res.status(200).json({msg: "Wishlist is empty."});
     }
     res.status(200).json({products: userWishlist.products});
 }));
