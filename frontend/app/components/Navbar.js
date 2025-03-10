@@ -1,113 +1,72 @@
 "use client";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import Search from "./Search";
 import { useAuth } from "../context/authContext";
+import { FaBars, FaTimes } from "react-icons/fa"; // Icons for menu toggle
 
 export default function Navbar() {
-    const {isUser, loading} = useAuth();
+    const { isUser, loading } = useAuth();
     const router = useRouter();
+    const [menuOpen, setMenuOpen] = useState(false);
 
-    const handleSearch = (query)=>{
-        if(query.trim() != ""){
+    const handleSearch = (query) => {
+        if (query.trim() !== "") {
             router.push(`/search?query=${query}`);
         }
-    }
-    if(loading){
-        return <div>Loading...</div>;
-    }
+    };
+
+    const toggleMenu = () => setMenuOpen(!menuOpen);
+
+    useEffect(() => {
+        const handleResize = () => {
+            if (window.innerWidth > 768) setMenuOpen(false);
+        };
+        window.addEventListener("resize", handleResize);
+        return () => window.removeEventListener("resize", handleResize);
+    }, []);
+
+    if (loading) return <div>Loading...</div>;
 
     return (
-        <nav style={styles.navbar}>
-            <div style={styles.title}>
+        <nav className="fixed top-0 left-0 w-full bg-blue-500 text-white shadow-md p-4 flex justify-between items-center z-50">
+            {/* Logo & Title */}
+            <div className="flex items-center gap-2">
                 <Image src="/logo.png" alt="App logo" width="30" height="30" />
-                <h1>E-commerce App</h1>
+                <h1 className="text-lg font-semibold">E-commerce App</h1>
             </div>
 
-            <Search onSearch={handleSearch}/>
+            {/* Search Component */}
+            <Search onSearch={handleSearch} />
 
-            <ul style={styles.list}>
+            {/* Hamburger Menu (visible on mobile) */}
+            <div className="md:hidden text-2xl cursor-pointer" onClick={toggleMenu}>
+                {menuOpen ? <FaTimes /> : <FaBars />}
+            </div>
+
+            {/* Nav Links */}
+            <ul className={`md:flex gap-6 text-lg absolute md:static top-16 right-0 w-full md:w-auto bg-blue-500 md:bg-transparent p-5 md:p-0 transition-all duration-300 ${menuOpen ? "block" : "hidden"}`}>
                 {isUser ? (
                     <>
-                        <li>
-                            <Link href="/user/home" style={styles.link}>Home</Link>
-                        </li>
-                        <li>
-                            <Link href="/user/products" style={styles.link}>Products</Link>
-                        </li>
-                        <li>
-                            <Link href="/user/orders" style={styles.link}>My Orders</Link>
-                        </li>
-                        <li>
-                            <Link href="/user/wishlist" style={styles.link}>Wishlist</Link>
-                        </li>
-                        <li>
-                            <Link href="/user/cart" style={styles.link}>My Cart</Link>
-                        </li>
-                        <li>
-                            <Link href="/user/profile" style={styles.link}>Profile</Link>
-                        </li>
-                        <li>
-                            <Link href="/user/logout" style={styles.link}>Log out</Link>
-                        </li>
+                        <li><Link href="/user/home" className="hover:text-red-400">Home</Link></li>
+                        <li><Link href="/user/products" className="hover:text-red-400">Products</Link></li>
+                        <li><Link href="/user/orders" className="hover:text-red-400">My Orders</Link></li>
+                        <li><Link href="/user/wishlist" className="hover:text-red-400">Wishlist</Link></li>
+                        <li><Link href="/user/cart" className="hover:text-red-400">My Cart</Link></li>
+                        <li><Link href="/user/profile" className="hover:text-red-400">Profile</Link></li>
+                        <li><Link href="/user/logout" className="hover:text-red-400">Log out</Link></li>
                     </>
                 ) : (
                     <>
-                        <li>
-                            <Link href="/" style={styles.link}>Home</Link>
-                        </li>
-                        <li>
-                            <Link href="/products" style={styles.link}>Products</Link>
-                        </li>
-                        <li>
-                            <Link href="/login" style={styles.link}>Login</Link>
-                        </li>
-                        <li>
-                            <Link href="/register" style={styles.link}>Register</Link>
-                        </li>
+                        <li><Link href="/" className="hover:text-red-400">Home</Link></li>
+                        <li><Link href="/products" className="hover:text-red-400">Products</Link></li>
+                        <li><Link href="/login" className="hover:text-red-400">Login</Link></li>
+                        <li><Link href="/register" className="hover:text-red-400">Register</Link></li>
                     </>
                 )}
             </ul>
         </nav>
     );
-}
-
-const styles = {
-    navbar: {
-        display: "flex",
-        justifyContent: "space-between",
-        alignItems: "center",
-        padding: "0.8rem 2rem",
-        backgroundColor: "#4A90E2",  // Soft blue background for the navbar
-        color: "#FFFFFF",  // White text for better contrast
-        boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",  // Soft shadow for depth
-        overflowX: "auto", /* Enables horizontal scroll */
-        whiteSpace: "nowrap",
-        position: "fixed", 
-        width: "100%", 
-        top: 0,
-        left: 0,
-        zIndex: 1000
-    },
-    title: {
-        display: "flex",
-        alignItems: "center",
-        gap: "0.6rem",
-    },
-    list: {
-        listStyle: "none",
-        display: "flex",
-        gap: "1.5rem",  // Slightly more space between navbar links
-    },
-    link: {
-        color: "#FFFFFF",  // White text for links
-        textDecoration: "none",  // Removing underline from links
-        fontSize: "1.1rem",
-        fontWeight: "500",  // Medium font weight for the links
-        transition: "color 0.3s ease",  // Smooth transition on hover
-    },
-    linkHover: {
-        color: "#FF6F61",  // Red-orange color for the hover effect
-    },
 }

@@ -13,7 +13,7 @@ const isValidObjectId = (id) => mongoose.Types.ObjectId.isValid(id);
 router.post('/:id', asyncHandler(async (req,res)=>{
     const userId = req.user.id;
     const product = req.params.id;
-    const {quantity} = req.body;
+    let {quantity} = req.body;
     if(quantity == "" || quantity == null) quantity = 1;
     const newQuantity = Number(quantity);
 

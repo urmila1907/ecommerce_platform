@@ -25,6 +25,7 @@ export default function Cart(){
             const data = await res.json();
             setCart(data.userCart);
             setIsLoading(false);
+            console.log(data);
 
         } catch (err) {
             console.error("Error fetching cart:", err);
@@ -75,6 +76,10 @@ export default function Cart(){
         }
     };
 
+    const handleOrder = async () => {
+        
+    };
+
     if (error) {
         return <div style={styles.error}>{error}</div>;
     }
@@ -104,7 +109,7 @@ export default function Cart(){
                         </div>
                     <div style={styles.amountDetails}>
                         <h3 style={styles.totalAmount}>Total Amount: ₹{cart.totalCost}</h3>
-                        <button style={styles.orderBtn}>Place Order</button>
+                        <button style={styles.orderBtn} onClick={handleOrder}>Place Order</button>
                     </div>
                     </div>
                 </> :
