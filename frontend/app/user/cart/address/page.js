@@ -71,6 +71,7 @@ export default function Address() {
         router.push("/user/cart/payment-method");
     }
     const handleAddAddress = () => {
+        setFormAddress(null);
         setIsModalOpen(true);
     }
 
@@ -84,8 +85,8 @@ export default function Address() {
             const res = await fetch(`/api/proxy/user/address/${address._id}`, {
                     method: "PUT",
                     credentials: "include",
-                //    headers: { "Content-Type": "application/json" },
-                    body: address
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(address)
                 });
             if (!res.ok) {
                 const errorText = await res.text();
@@ -106,6 +107,7 @@ export default function Address() {
                     method: "DELETE",
                     credentials: "include",
                 });
+                
             if (!res.ok) {
                 const errorText = await res.text();
                 setError(errorText);
@@ -126,8 +128,8 @@ export default function Address() {
             ) : (
                 <>
                     {isModalOpen && <AddressFormModal 
-                        onClose={() => setIsModalOpen(false)} 
-                        onSave={formAddress ? editAddress : handleSaveAddress} 
+                        onClose={() => setIsModalOpen(false)}  
+                        onSave={formAddress ? editAddress : handleSaveAddress}
                         formAddress={formAddress} />
                     }
 

@@ -84,7 +84,7 @@ export async function proxyHandler(req) {
 
   let body = null;
 
-  if (["PATCH", "POST"].includes(req.method)) {
+  if (["PATCH", "POST", "PUT"].includes(req.method)) {
     try {
       const text = await req.text();
       body = text.trim() ? JSON.parse(text) : null;
@@ -115,6 +115,10 @@ export async function proxyHandler(req) {
 
 // Export the specific handlers for GET, PATCH, POST and DELETE
 export async function GET(req) {
+  return proxyHandler(req);
+}
+
+export async function PUT(req) {
   return proxyHandler(req);
 }
 
