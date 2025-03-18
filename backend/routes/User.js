@@ -9,6 +9,7 @@ const wishlistRoutes = require('../routes/Wishlist');
 const orderRoutes = require('../routes/Order');
 const paymentMethodRoutes = require('../routes/PaymentMethod');
 const paymentRoutes = require("../routes/Payment");
+const addressRoutes = require("../routes/Address");
 const Product = require('../models/Product');
 
 // Apply token authentication middleware to all /users routes
@@ -36,8 +37,15 @@ router.get('/verify', async (req,res) => {
 });
 
 //Route for getting profile (protected)
-router.get('/profile', (req,res)=>{
-    res.json({user: req.user});
+router.get('/profile', async (req,res)=>{
+    const user = await User.findById(req.user.id);
+    const userDetails = {
+        name: user.name,
+        email: user.email,
+        phoneNum: user.phoneNum,
+        address: user.address
+    };
+    res.status(200).json({user: userDetails});
 });
 
 //Route for logout
@@ -98,6 +106,9 @@ router.use('/cart', cartRoutes);
 
 //Route for handling wishlist routes
 router.use('/wishlist', wishlistRoutes);
+
+//Route for handling address routes
+router.use('/address', addressRoutes);
 
 //Router for handling payment methods
 router.use('/payment-method', paymentMethodRoutes);

@@ -39,3 +39,16 @@ app.use('/product', productRoutes);
 app.listen(port, ()=>{
     console.log(`Listening at port ${port}`);
 });
+
+// Handle process termination to close server properly
+process.on("SIGTERM", () => {
+    server.close(() => {
+        process.exit(0);
+    });
+});
+
+process.on("SIGINT", () => {
+    server.close(() => {
+        process.exit(0);
+    });
+});

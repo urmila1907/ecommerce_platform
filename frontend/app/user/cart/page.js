@@ -1,11 +1,13 @@
 "use client";
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { CiCircleMinus, CiCirclePlus  } from "react-icons/ci";
 
 export default function Cart(){
     const [cart, setCart] = useState(null);
     const [error, setError] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
+    const router = useRouter();
 
     const fetchCart = async () => {
         setIsLoading(true);
@@ -77,7 +79,7 @@ export default function Cart(){
     };
 
     const handleOrder = async () => {
-        
+        router.push("/user/cart/address");
     };
 
     if (error) {

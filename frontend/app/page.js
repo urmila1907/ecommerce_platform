@@ -2,7 +2,7 @@ export default function Home(){
     return (
         <>
             <div style={styles.main}>
-                Hello to my Ecommerce store!
+                <h2>Hello to my Ecommerce store!</h2>
             </div>
         </>
     )
@@ -10,6 +10,10 @@ export default function Home(){
 
 const styles = {
     main: {
-        textAlign: "center"
+     //   textAlign: "center",
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        marginTop: "2rem"
     }
 }

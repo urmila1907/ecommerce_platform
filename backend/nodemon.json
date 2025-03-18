@@ -1,0 +1,14 @@
+{
+    "restartable": "rs",
+    "ignore": ["node_modules/**", ".git"],
+    "execMap": {
+      "js": "node"
+    },
+    "events": {
+      "restart": "kill-port 8080"
+    },
+    "env": {
+      "NODE_ENV": "development"
+    }
+}
+  
