@@ -68,7 +68,7 @@ export default function Address() {
         }
     }
     const handleMove = () => {
-        router.push("/user/cart/payment-method");
+        router.push("/user/cart/PaymentMethod");
     }
     const handleAddAddress = () => {
         setFormAddress(null);

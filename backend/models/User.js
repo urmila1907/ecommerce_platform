@@ -35,7 +35,11 @@ const userSchema = new mongoose.Schema({
     address: [{
         type: Schema.Types.ObjectId,
         ref: 'Address',
-        }]
+        }],
+    paymentMethod: [{
+        type: Schema.Types.ObjectId,
+        ref: 'PaymentMethod',
+    }]
 })
 
 const User = mongoose.model("User", userSchema);
