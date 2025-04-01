@@ -1,13 +1,17 @@
 "use client";
 import { useState } from "react";
+import PaymentConfModal from "@/app/components/PaymentConfModal";
+import { useRouter } from "next/navigation";
 
 export default function PaymentMethod() {
     const [activeOption, setActiveOption] = useState("recommended");
     const [recommendedOption, setRecommendedOption] = useState("codR");
+    const [modal, setModal] = useState(false);
     const [upiId, setUpiId] = useState("");
     const [cardNumber, setCardNumber] = useState("");
     const [expiryDate, setExpiryDate] = useState("");
     const [cvv, setCvv] = useState("");
+    const router = useRouter();
 
     const isValidUpi = /^[a-zA-Z0-9]+@[a-zA-Z]+$/.test(upiId);
     const isValidCard = /^\d{16}$/.test(cardNumber) && /^\d{2}\/\d{2}$/.test(expiryDate) && /^\d{3}$/.test(cvv);
@@ -17,11 +21,38 @@ export default function PaymentMethod() {
         (activeOption === "card" && !isValidCard);
 
     const handleContinue = () => {
-        console.log("Continue with:", activeOption);
+        setModal(true);
+    };
+
+    const confirmOrder = async () => {
+        try {
+            if(activeOption === "cod" || activeOption === "recommended"){
+                const response = await fetch("/api/proxy/user/order", {
+                    method: "POST",
+                    credentials: "include",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({ paymentMethod: activeOption }),
+                });
+    
+                if (response.ok) {
+                    alert("Order placed successfully!");
+                    setModal(false);
+                 //   const id = response.allOrderDetails._id;
+                 //   router.push(`/user/orders/${id}`);
+                 router.push('/user/orders');
+                } else {
+                    alert("Failed to place order. Try again.");
+                }
+            }
+        } catch (error) {
+            console.error("Error:", error);
+        }
     };
 
     return (
-        <div className="max-w-lg mx-auto p-6 bg-white shadow-lg rounded-lg">
+        <div className="max-w-lg mx-auto my-6 p-6 bg-white shadow-lg rounded-lg">
             <h2 className="text-xl font-semibold mb-4">Choose Payment Mode</h2>
 
             {/* Recommended (Default Open) */}
@@ -155,6 +186,13 @@ export default function PaymentMethod() {
             >
                 Continue
             </button>
+
+            {modal && (
+                <PaymentConfModal 
+                    onConfirm={confirmOrder} 
+                    onClose={() => setModal(false)} 
+                />
+            )}
         </div>
     );
 }
