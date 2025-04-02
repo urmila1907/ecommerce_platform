@@ -55,7 +55,6 @@ router.get('/', asyncHandler(async (req,res)=>{
     if(!orderDetails){
         return res.status(200).send("No orders present. Do some shopping!");
     }
-    console.log("Fetched Orders:", JSON.stringify(orderDetails, null, 2));
     return res.status(200).json({orderDetails});
 }));
 
