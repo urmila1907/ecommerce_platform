@@ -145,9 +145,7 @@ export default function Products(){
                         onClick={() => router.push(`/user/product/${product._id}`)}
                     >
                         <h3 className="productName">{product.productName}</h3>
-                        <h4 className="productDescription">{product.description}</h4>
                         <h5 className="productPrice">Price: ₹{product.price}</h5>
-                        <h5 className="productQuantity">Available: {product.quantity}</h5>
 
                         {hoveredProductId === product._id && (
                             <div>
