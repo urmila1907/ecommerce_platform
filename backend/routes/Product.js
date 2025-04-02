@@ -119,12 +119,12 @@ router.get("/", async (req, res) => {
 
         // Fetch products from FakeStoreAPI
         let fakeStoreProducts = [];
-        try {
+       /* try {
             const response = await axios.get("https://fakestoreapi.com/products");
             fakeStoreProducts = response.data;
         } catch (apiError) {
             console.error("FakeStoreAPI fetch failed:", apiError.message);
-        }
+        } */
 
         // Combine MongoDB and FakeStoreAPI products
         const allProducts = [...dbProducts, ...fakeStoreProducts];
