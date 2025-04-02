@@ -29,8 +29,6 @@ export default function RootLayout({ children }) {
             {children}
           </ClientLayout>
         </AuthProvider>
-        <About />
-        <Contact />
       </body>
     </html>
   );

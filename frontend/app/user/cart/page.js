@@ -1,11 +1,13 @@
 "use client";
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { CiCircleMinus, CiCirclePlus  } from "react-icons/ci";
 
 export default function Cart(){
     const [cart, setCart] = useState(null);
     const [error, setError] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
+    const router = useRouter();
 
     const fetchCart = async () => {
         setIsLoading(true);
@@ -25,6 +27,7 @@ export default function Cart(){
             const data = await res.json();
             setCart(data.userCart);
             setIsLoading(false);
+            console.log(data);
 
         } catch (err) {
             console.error("Error fetching cart:", err);
@@ -75,6 +78,10 @@ export default function Cart(){
         }
     };
 
+    const handleOrder = async () => {
+        router.push("/user/cart/address");
+    };
+
     if (error) {
         return <div style={styles.error}>{error}</div>;
     }
@@ -104,7 +111,7 @@ export default function Cart(){
                         </div>
                     <div style={styles.amountDetails}>
                         <h3 style={styles.totalAmount}>Total Amount: ₹{cart.totalCost}</h3>
-                        <button style={styles.orderBtn}>Place Order</button>
+                        <button style={styles.orderBtn} onClick={handleOrder}>Place Order</button>
                     </div>
                     </div>
                 </> :

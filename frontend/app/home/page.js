@@ -11,7 +11,8 @@ export default function Home() {
 const styles = {
   main: {
     scrollBehavior: "smooth", 
-    height: "100vh",
+    minHeight: "100vh",
+    paddingBottom: "4rem",
   },
   tagline: {
     color: "#456",

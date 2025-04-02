@@ -13,23 +13,32 @@ const isValidObjectId = (id) => mongoose.Types.ObjectId.isValid(id);
 
 //Router for placing an order
 router.post('/', CartToOrder, asyncHandler(async (req,res) =>{
-    const { razorpayOrderId } = req.body;
+    const {paymentMethod} = req.body;
+    console.log(paymentMethod);
 
-    // Check if the payment is verified
-    const payment = await Payment.findOne({ razorpay_order_id: razorpayOrderId, status: "paid" });
-    if (!payment) {
-        return res.status(400).send("Payment not verified or invalid payment details.");
+    if(paymentMethod != "cod" && paymentMethod != "recommended"){
+        const { razorpayOrderId } = req.body;
+
+        // Check if the payment is verified
+        const payment = await Payment.findOne({ razorpay_order_id: razorpayOrderId, status: "paid" });
+        if (!payment) {
+            return res.status(400).send("Payment not verified or invalid payment details.");
+        }
     }
 
-    const products = req.products;
-    const allOrderDetails = await Promise.all(
-        products.map(product => Order.create({
-            product: product.product,
-            quantity: product.quantity,
-            totalCost: product.quantity * product.price,
-            customer: req.user.id
-        }))
-    );    
+    let orderProducts = [];
+    let cost = 0;
+
+    for(const product of req.products){
+        cost += (product.quantity * product.price);
+        orderProducts.push({product: product.product, quantity: product.quantity});
+    }
+
+    const allOrderDetails = await Order.create({
+        products: orderProducts,
+        totalCost: cost,
+        customer: req.user.id
+    })
     await Cart.findOneAndUpdate({customer: req.user.id},
         {$set: {products: []}, totalNoOfProducts: 0, totalCost: 0},
         {new: true, runValidators: true,}
@@ -42,10 +51,11 @@ router.post('/', CartToOrder, asyncHandler(async (req,res) =>{
 
 //Router for getting all orders for a user
 router.get('/', asyncHandler(async (req,res)=>{
-    const orderDetails = await Order.find({customer: req.user.id}).populate('product');
+    const orderDetails = await Order.find({customer: req.user.id}).populate('products.product');
     if(!orderDetails){
         return res.status(200).send("No orders present. Do some shopping!");
     }
+    console.log("Fetched Orders:", JSON.stringify(orderDetails, null, 2));
     return res.status(200).json({orderDetails});
 }));
 

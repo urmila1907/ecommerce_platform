@@ -5,6 +5,7 @@ import { useAuth } from "@/app/context/authContext";
 import { FaRegHeart, FaCartShopping } from "react-icons/fa6";
 import { FaHeart } from "react-icons/fa";
 import { IoCartOutline } from "react-icons/io5";
+import { useRouter } from "next/navigation";
 
 export default function Product() {
     const [product, setProduct] = useState(null);
@@ -16,7 +17,8 @@ export default function Product() {
     const params = useParams();
     const id = params?.id || "";
     const {isUser} = useAuth();
-
+    const router = useRouter();
+    
     useEffect(() => {
         if (!id) return;
 
@@ -44,42 +46,48 @@ export default function Product() {
         fetchProduct();
     }, [id]);
 
-    useEffect(()=>{
-        if(!id || !isUser) return;
-        let isMounted = true; // Prevent state update if component unmounts
+    const fetchCartStatus = async () => {
+        try {
+            const cartRes = await fetch(`/api/proxy/user/cart/${id}`, {
+                method: "GET",
+                credentials: "include",
+            });
 
-        const fetchWishlistCartStatus = async () => {
+            if (cartRes.ok) {
+                const cartData = await cartRes.json();
+                console.log("Cart Status:", cartData.exist);
+                setCart(cartData.exist);
+            }
+        } catch (err) {
+            console.error("Error checking cart status:", err);
+            setError("Error checking cart status.");
+        }
+    };
+
+    useEffect(() => {
+        if (!id || !isUser) return;
+        
+        const fetchWishlistStatus = async () => {
             try {
                 const wishlistRes = await fetch(`/api/proxy/user/wishlist/${id}`, {
                     method: "GET",
                     credentials: "include",
                 });
-
+    
                 if (wishlistRes.ok) {
                     const wishlistData = await wishlistRes.json();
-                    if (isMounted) setWishlist(wishlistData.exist);
-                }
-
-                const cartRes = await fetch(`/api/proxy/user/cart/${id}`, {
-                    method: "GET",
-                    credentials: "include",
-                });
-
-                if (cartRes.ok) {
-                    const cartData = await cartRes.json();
-                    if (isMounted) setCart(cartData.exist);
+                    console.log("Wishlist Status:", wishlistData.exist);
+                    setWishlist(wishlistData.exist);
                 }
             } catch (err) {
-                console.error("Error checking wishlist/cart status:", err);
-                if (isMounted) setError("Server error while checking product's presence in wishlist/cart");
+                console.error("Error checking wishlist status:", err);
+                setError("Error checking wishlist status.");
             }
         };
-        fetchWishlistCartStatus();
-
-        return () => {
-            isMounted = false; // Cleanup function
-        };
-    }, [id, isUser]);
+    
+        fetchWishlistStatus();
+        fetchCartStatus();
+    }, [id, isUser]);    
 
     const handleWishlist = async ()=>{
         try{
@@ -94,7 +102,7 @@ export default function Product() {
                 return;
             }
             const data = await res.json();
-            setWishlist(true);
+            setWishlist(prev => !prev);
         }   
         catch(err){
             console.error("Error adding product to wishlist:", err);
@@ -114,7 +122,7 @@ export default function Product() {
                 return;
             }
             const data = await res.json();
-            setWishlist(false);
+            setWishlist(prev => !prev);
         }   
         catch(err){
             console.error("Error removing product from wishlist:", err);
@@ -143,24 +151,8 @@ export default function Product() {
         }
     }
 
-    const handleRemoveCart = async ()=>{
-        try{
-            const res = await fetch(`/api/proxy/user/cart/${id}`, {
-                method: "DELETE",
-                credentials: "include",
-            });
-            if (!res.ok) {
-                const errorText = await res.text();
-                setError(errorText);
-                return;
-            }
-            const data = await res.json();
-            setCart(false);
-        }   
-        catch(err){
-            console.error("Error removing product from cart:", err);
-            setError("Server error while removing product from cart");
-        }
+    const handleGoToCart = ()=>{
+        router.push("/user/cart");
     }
 
     return (
@@ -190,14 +182,14 @@ export default function Product() {
                                     {wishlist ? "Added to Wishlist" : "Add to Wishlist"}	
                                 </div>
                             </button>
-                            <button onClick={() => cart ? 
-                                handleRemoveCart() : 
+                            <button onClick={() => cart == true ? 
+                                handleGoToCart() : 
                                 handleCart()}
                                 style={styles.cartBtn}
                             >
                                 <div style={styles.btnCart}>
-                                    {cart ? <FaCartShopping  /> : <IoCartOutline />}
-                                    {cart ? "Added to Cart" : "Add to Cart"}
+                                    {cart == true ? <FaCartShopping  /> : <IoCartOutline />}
+                                    {cart == true ? "Go to Cart" : "Add to Cart"}
                                 </div>
                             </button>
                         </div>

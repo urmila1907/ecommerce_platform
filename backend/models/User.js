@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const Schema = mongoose.Schema;
 
 const userSchema = new mongoose.Schema({
     name:{
@@ -30,7 +31,15 @@ const userSchema = new mongoose.Schema({
         required: true,
         unique: true,
         match: [/^\S+@\S+\.\S+$/, 'Please use a valid email address'],
-        }
+        },
+    address: [{
+        type: Schema.Types.ObjectId,
+        ref: 'Address',
+        }],
+    paymentMethod: [{
+        type: Schema.Types.ObjectId,
+        ref: 'PaymentMethod',
+    }]
 })
 
 const User = mongoose.model("User", userSchema);
