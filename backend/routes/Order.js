@@ -13,12 +13,9 @@ const isValidObjectId = (id) => mongoose.Types.ObjectId.isValid(id);
 
 //Router for placing an order
 router.post('/', CartToOrder, asyncHandler(async (req,res) =>{
-    const {paymentMethod} = req.body;
-    console.log(paymentMethod);
+    const {paymentMethod, razorpayOrderId} = req.body;
 
-    if(paymentMethod != "cod" && paymentMethod != "recommended"){
-        const { razorpayOrderId } = req.body;
-
+    if(paymentMethod == "upi" || paymentMethod == "card"){
         // Check if the payment is verified
         const payment = await Payment.findOne({ razorpay_order_id: razorpayOrderId, status: "paid" });
         if (!payment) {
