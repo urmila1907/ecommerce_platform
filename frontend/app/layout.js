@@ -4,6 +4,7 @@ import ClientLayout from "./clientLayout";
 import About from "./components/About";
 import Contact from "./components/Contact";
 import { AuthProvider } from "./context/authContext";
+import { Toaster } from "react-hot-toast";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -24,6 +25,7 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+      <Toaster position="top-right" reverseOrder={false} />
         <AuthProvider>
           <ClientLayout>
             {children}

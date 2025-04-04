@@ -2,6 +2,7 @@
 import { useState } from "react";
 import PaymentConfModal from "@/app/components/PaymentConfModal";
 import { useRouter } from "next/navigation";
+import toast from "react-hot-toast";
 
 export default function PaymentMethod() {
     const loadRazorpayScript = () => {
@@ -38,13 +39,13 @@ export default function PaymentMethod() {
                 });
     
                 if (response.ok) {
-                    alert("Order placed successfully!");
+                    toast.success("Order placed successfully!");
                     setModal(false);
-                 //   const id = response.allOrderDetails._id;
-                 //   router.push(`/user/orders/${id}`);
-                 router.push('/user/orders');
+                    const order = await response.json();
+                    const id = order.allOrderDetails._id;
+                    router.push(`/user/order/${id}`);
                 } else {
-                    alert("Failed to place order. Try again.");
+                    toast.error("Failed to place order. Try again.");
                 }
             }
             else if(activeOption === "upi" || activeOption === "card"){
@@ -76,7 +77,7 @@ export default function PaymentMethod() {
                     const razorpayLoaded = await loadRazorpayScript();
 
                     if (!razorpayLoaded) {
-                        alert("Failed to load Razorpay SDK.");
+                        toast.error("Failed to load Razorpay SDK.");
                         return;
                     }
                     const options = {
@@ -107,7 +108,7 @@ export default function PaymentMethod() {
                             if (verifyRes.ok) {
                                 const razorpayDetails = await verifyRes.json();
                                 
-                                alert("Payment successful!");
+                                toast.success("Payment successful!");
                                 const resp = await fetch("/api/proxy/user/order", {
                                     method: "POST",
                                     credentials: "include",
@@ -118,21 +119,21 @@ export default function PaymentMethod() {
                                 });
                     
                                 if (resp.ok) {
-                                    alert("Order placed successfully!");
+                                    toast.success("Order placed successfully!");
                                     setModal(false);
-                                 //   const id = resp.allOrderDetails._id;
-                                 //   router.push(`/user/orders/${id}`);
-                                 router.push('/user/orders');
+                                    const order = await resp.json();
+                                    const id = order.allOrderDetails._id;
+                                    router.push(`/user/order/${id}`);
                                 } else {
-                                    alert("Failed to place order. Try again.");
+                                    toast.error("Failed to place order. Try again.");
                                 }
                             } else {
-                                alert("Payment verification failed.");
+                                toast.error("Payment verification failed.");
                             }
                         },
                         modal: {
                             ondismiss: function () {
-                                alert("Payment cancelled.");
+                                toast("Payment cancelled.", { icon: "❌" });
                             }
                         }
                     };
@@ -140,7 +141,7 @@ export default function PaymentMethod() {
                     const rzp = new window.Razorpay(options);
                     rzp.open();
                 } else {
-                    alert("Failed to create Razorpay order.");
+                    toast.error("Failed to create Razorpay order.");
                 }
             }
         } catch (error) {

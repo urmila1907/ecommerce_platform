@@ -1,9 +1,11 @@
 "use client";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 export default function Order() {
     const [orders, setOrders] = useState([]);
     const [error, setError] = useState(null);
+    const router = useRouter();
 
     useEffect(() => {
         const fetchOrders = async () => {
@@ -35,22 +37,29 @@ export default function Order() {
         return <div style={styles.noOrders}>Do some shopping!</div>;
     }
 
+    const handleOrder = (id) => {
+        router.push(`/user/order/${id}`);
+    }
+
     return (
         <div>
             <div style={styles.ordersList}>
                 {orders.map((order) => (
-                    <div key={order._id} style={styles.orderCard}>
-                        {/* Product Details */}
-                        {order.products.map((product) => (
-                            <div key={product.product._id} style={styles.productDetails}>
-                                <h3 style={styles.productName}>{product.product.productName}</h3>
-                                <p style={styles.productDescription}>Quantity: {product.quantity}</p>
-                                <p style={styles.productPrice}>Price: ₹{product.product.price}</p>
-                            </div>
-                        ))}
-
-                        {/* Order Details */}
-                        <div style={styles.orderDetails}>
+                    <div key={order._id} style={styles.orderCard} onClick={() => handleOrder(order._id)}>
+                    <div style={styles.orderContent}>
+                        {/* Left: Product Info */}
+                        <div style={styles.productSection}>
+                            {order.products.map((product) => (
+                                <div key={product.product._id} style={styles.productDetails}>
+                                    <h3 style={styles.productName}>{product.product.productName}</h3>
+                                    <p style={styles.productDescription}>Quantity: {product.quantity}</p>
+                                    <p style={styles.productPrice}>Price: ₹{product.product.price}</p>
+                                </div>
+                            ))}
+                        </div>
+                
+                        {/* Right: Order Info */}
+                        <div style={styles.orderInfoSection}>
                             <h4 style={styles.orderStatus}>Status: {order.status}</h4>
                             <h4 style={styles.orderTotalCost}>Total Cost: ₹{order.totalCost}</h4>
                             <h5 style={styles.orderDate}>
@@ -58,6 +67,7 @@ export default function Order() {
                             </h5>
                         </div>
                     </div>
+                </div>                
                 ))}
             </div>
         </div>
@@ -67,49 +77,65 @@ export default function Order() {
 const styles = {
     ordersList: {
         display: "flex",
-        flexWrap: "wrap",
-        justifyContent: "space-evenly",
-        alignItems: "flex-start",
+        flexDirection: "column",
         gap: "2rem",
-        padding: "1rem",
+        padding: "2rem 1rem",
         backgroundColor: "#F1F5F9",
-        textAlign: "center",
+        width: "100%",
     },
     orderCard: {
-        padding: "1.5rem",
         backgroundColor: "#FFFFFF",
         color: "#2D3748",
-        borderRadius: "10px",
-        width: "260px",
-        boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
-        transition: "transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out",
+        borderRadius: "12px",
+        boxShadow: "0 6px 16px rgba(0, 0, 0, 0.08)",
         cursor: "pointer",
+        transition: "transform 0.2s ease-in-out",
+        padding: "1.5rem",
+        margin: "0 auto",
+        width: "95%", // full width with small side margin
+        maxWidth: "1200px",
+    },
+    orderContent: {
+        display: "flex",
+        flexDirection: "row",
+        justifyContent: "space-between",
+        gap: "1rem",
+        flexWrap: "wrap",
+    },
+    productSection: {
+        flex: 1,
+        display: "flex",
+        flexDirection: "column",
+        gap: "1rem",
+    },
+    productDetails: {
+        padding: "1rem",
+        backgroundColor: "#F8FAFC",
+        borderRadius: "8px",
+        boxShadow: "0 2px 6px rgba(0, 0, 0, 0.05)",
     },
     productName: {
-        fontSize: "1.5rem",
+        fontSize: "1.2rem",
         fontWeight: "600",
         color: "#4A90E2",
-        marginBottom: "0.5rem",
+        marginBottom: "0.4rem",
     },
     productPrice: {
         fontSize: "1.1rem",
-        fontWeight: "600",
+        fontWeight: "500",
         color: "#2D3748",
-        marginBottom: "0.5rem",
+        marginBottom: "0.3rem",
     },
     productDescription: {
         fontSize: "1rem",
         color: "#6B7280",
-        marginBottom: "0.5rem",
     },
-    productDetails: {
+    orderInfoSection: {
+        flex: 1,
         padding: "1rem",
-        backgroundColor: "#F1F5F9",
-        borderRadius: "8px",
-        marginBottom: "1rem",
-    },
-    orderDetails: {
-        padding: "1rem",
+        display: "flex",
+        flexDirection: "column",
+        justifyContent: "center",
         borderRadius: "8px",
     },
     orderStatus: {
