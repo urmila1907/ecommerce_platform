@@ -64,3 +64,15 @@
     padding: 1rem;
     font-size: 1.6rem;
 }
+.btnContainer {
+    margin-top: 1rem;
+    text-align: center;
+    border: 0.05rem solid #787878;
+}
+.btnHeart {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.7rem;
+    align-items: center;
+    padding: 0.2rem;
+}

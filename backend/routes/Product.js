@@ -111,32 +111,21 @@ router.get('/:id', async (req,res)=>{
 //Route for getting all products' information
 router.get("/", async (req, res) => {
     try {
+        console.log(req);
         const { page = 1, limit = 10, ...filters } = req.query;
 
         // Fetch products from MongoDB
         const dbProducts = await Product.find(filters).limit(limit * 1).skip((page - 1) * limit);
         const dbCount = await Product.countDocuments(filters);
 
-        // Fetch products from FakeStoreAPI
-        let fakeStoreProducts = [];
-       /* try {
-            const response = await axios.get("https://fakestoreapi.com/products");
-            fakeStoreProducts = response.data;
-        } catch (apiError) {
-            console.error("FakeStoreAPI fetch failed:", apiError.message);
-        } */
-
-        // Combine MongoDB and FakeStoreAPI products
-        const allProducts = [...dbProducts, ...fakeStoreProducts];
-
         // Apply pagination to combined results
         const startIndex = (page - 1) * limit;
-        const paginatedProducts = allProducts.slice(startIndex, startIndex + limit);
+        const paginatedProducts = dbProducts.slice(startIndex, startIndex + limit);
 
         res.status(200).json({
-            total: allProducts.length,
+            total: dbProducts.length,
             currentPage: page,
-            totalPages: Math.ceil(allProducts.length / limit),
+            totalPages: Math.ceil(dbProducts.length / limit),
             products: paginatedProducts,
         });
 
