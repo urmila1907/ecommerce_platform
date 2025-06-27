@@ -15,7 +15,7 @@ app.use(cookieParser());
 app.use(express.json());
 
 app.use(cors({
-    origin: 'http://localhost:3000', // Your frontend URL
+    origin: process.env.FRONTEND_URL,
     credentials: true,
 }));
 
@@ -36,8 +36,8 @@ app.use('/refresh-token', refreshTokenRoute);
 app.use('/user', userRoutes);
 app.use('/product', productRoutes);
 
-app.listen(port, ()=>{
-    console.log(`Listening at port ${port}`);
+const server = app.listen(port, () => {
+  console.log(`Listening at port ${port}`);
 });
 
 // Handle process termination to close server properly
