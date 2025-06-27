@@ -27,8 +27,6 @@ export default function Cart(){
             const data = await res.json();
             setCart(data.userCart);
             setIsLoading(false);
-            console.log(data);
-
         } catch (err) {
             console.error("Error fetching cart:", err);
             setError("Server error while fetching cart details");

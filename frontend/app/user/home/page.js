@@ -1,41 +1,69 @@
-import {fetchWithToken} from "@/utils/fetchWithToken";
+"use client";
+import { useRouter } from "next/navigation";
+import { useState, useEffect } from "react";
 
-export default async function Home(){
-    try{
-        const res = await fetchWithToken(`${process.env.NEXT_PUBLIC_API_BASE_URL}/user/`, {
-            method: 'GET',
-            credentials: "include"
-        });
+export default function Home() {
+    const router = useRouter();
+    const [products, setProducts] = useState([]);
+    const [error, setError] = useState(null);
+    const [loading, setLoading] = useState(true);
 
-        if (!res.ok) {
-            return <div style={styles.error}>Failed to fetch home details</div>;
-        }
-        const data = await res.json();
-        const products = data.products;
-        if (!Array.isArray(products) || products.length === 0) {
-            return <div style={styles.noProducts}>No products available</div>
+    useEffect(() => {
+        const userDetails = async () => {
+            try {
+                const res = await fetch("/api/proxy/user", {
+                    method: 'GET',
+                    credentials: "include"
+                });
+
+                if (!res.ok) {
+                    setError("Failed to fetch home details");
+                    return;
+                }
+
+                const data = await res.json();
+                const products = data.products;
+
+                if (!Array.isArray(products) || products.length === 0) {
+                    setError("No products available");
+                    return;
+                }
+
+                setProducts(products);
+            } catch (err) {
+                console.error('Error fetching products:', err);
+                setError("Server error while fetching products");
+            } finally {
+                setLoading(false);
+            }
         };
 
-        return (
-            <div>
-                <main>
-                    <div style={styles.products}>
-                        {products.map((product) => (
-                            <div key={product._id} style={styles.product}>
-                                <h3 style={styles.productName}>{product.productName}</h3>
-                                <h4 style={styles.productDescription}>{product.description}</h4>
-                                <h5 style={styles.productPrice}>Price: ₹{product.price}</h5>
-                                <h5 style={styles.productQuantity}>Available: {product.quantity}</h5>
-                            </div>
-                        ))}
-                    </div>
-                </main>
-            </div>
-        );
-    }catch (err) {
-        console.error('Error fetching products:', err);
-        return <div>Server error while fetching products</div>;
-    }
+        userDetails();
+    }, []);
+
+    const handleClick = (id) => {
+        router.push(`/user/product/${id}`);
+    };
+
+    if (loading) return <div style={styles.loading}>Loading products...</div>;
+    if (error) return <div style={styles.error}>{error}</div>;
+
+    return (
+        <div>
+            <main>
+                <div style={styles.products}>
+                    {products.map((product) => (
+                        <div key={product._id} style={styles.product} onClick={() => handleClick(product._id)}>
+                            <h3 style={styles.productName}>{product.productName}</h3>
+                            <h4 style={styles.productDescription}>{product.description}</h4>
+                            <h5 style={styles.productPrice}>Price: ₹{product.price}</h5>
+                            <h5 style={styles.productQuantity}>Available: {product.quantity}</h5>
+                        </div>
+                    ))}
+                </div>
+            </main>
+        </div>
+    );
 }
 
 const styles = {

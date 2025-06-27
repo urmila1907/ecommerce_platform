@@ -60,17 +60,22 @@ async function refreshToken() {
 // Main handler function
 export async function proxyHandler(req) {
   let cookie = await cookies();
-  let token = cookie.get("authToken")?.value;
-
   const path = req.nextUrl.pathname.replace("/api/proxy", "");
   const apiUrl = `${process.env.NEXT_PUBLIC_API_BASE_URL}${path}`;
 
-  if (!token) {
-    token = await refreshToken();
+  let token = null;
+  
+  // Only require token for user-protected routes
+  if (path.startsWith("/user")) {
+    token = cookie.get("authToken")?.value;
+
     if (!token) {
-      return new Response(JSON.stringify({ error: "Failed to refresh token" }), {
-        status: 401,
-      });
+      token = await refreshToken();
+      if (!token) {
+        return new Response(JSON.stringify({ error: "Failed to refresh token" }), {
+          status: 401,
+        });
+      }
     }
   }
 

@@ -77,26 +77,26 @@ export default function Products(){
     }, [isUser, wishlistProducts]);     
 
     const handleWishlist = async (id)=>{
-        try{
-            const res = await fetch(`/api/proxy/user/wishlist/${id}`, {
-                method: "POST",
-                body: ""
-            });
-            if (!res.ok) {
-                const errorText = await res.text();
-                setError(errorText);
-                return;
+            try{
+                const res = await fetch(`/api/proxy/user/wishlist/${id}`, {
+                    method: "POST",
+                    body: ""
+                });
+                if (!res.ok) {
+                    const errorText = await res.text();
+                    setError(errorText);
+                    return;
+                }
+                const data = await res.json();
+                setWishlistState((prevState) => ({
+                    ...prevState,
+                    [id]: true, // Add to wishlist
+                }));
+            }   
+            catch(err){
+                console.error("Error adding product to wishlist:", err);
+                setError("Server error while adding product to wishlist");
             }
-            const data = await res.json();
-            setWishlistState((prevState) => ({
-                ...prevState,
-                [id]: true, // Add to wishlist
-            }));
-        }   
-        catch(err){
-            console.error("Error adding product to wishlist:", err);
-            setError("Server error while adding product to wishlist");
-        }
     }
 
     const handleRemoveWishlist = async (id)=>{
@@ -146,18 +146,19 @@ export default function Products(){
                     >
                         <h3 className="productName">{product.productName}</h3>
                         <h5 className="productPrice">Price: ₹{product.price}</h5>
-
+                        <h5 className="productQuantity">Available: {product.quantity}</h5>
+                        
                         {hoveredProductId === product._id && (
                             <div>
                                 {isUser && (
-                                    <div style={styles.btnContainer}>
+                                    <div className="btnContainer">
                                         <button onClick={(e) => {
                                             e.stopPropagation();
                                             wishlistState[product._id] 
                                             ? handleRemoveWishlist(product._id) 
                                             : handleWishlist(product._id)
                                         }}>
-                                            <div style={styles.btnHeart}>
+                                            <div className="btnHeart">
                                                 {wishlistState[product._id] ? <FaHeart /> : <FaRegHeart />}
                                                 {wishlistState[product._id] ? "Added to Wishlist" : "Add to Wishlist"}	
                                             </div>
@@ -171,19 +172,4 @@ export default function Products(){
             </div>
         </div>
     );
-}
-
-const styles = {
-    btnContainer:{
-        marginTop: "1rem",
-        textAlign: "center",
-        border: "0.05rem solid #787878"
-    },
-    btnHeart: {
-        display: "flex",
-        flexWrap: "wrap",
-        gap: "0.7rem",
-        alignItems: "center",
-        padding: "0.2rem"
-    }
 }

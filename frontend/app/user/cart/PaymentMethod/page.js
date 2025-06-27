@@ -2,23 +2,25 @@
 import { useState } from "react";
 import PaymentConfModal from "@/app/components/PaymentConfModal";
 import { useRouter } from "next/navigation";
+import toast from "react-hot-toast";
 
 export default function PaymentMethod() {
+    const loadRazorpayScript = () => {
+        return new Promise((resolve) => {
+            if (window.Razorpay) return resolve(true); // already loaded
+    
+            const script = document.createElement("script");
+            script.src = "https://checkout.razorpay.com/v1/checkout.js";
+            script.onload = () => resolve(true);
+            script.onerror = () => resolve(false);
+            document.body.appendChild(script);
+        });
+    };
+    
     const [activeOption, setActiveOption] = useState("recommended");
     const [recommendedOption, setRecommendedOption] = useState("codR");
     const [modal, setModal] = useState(false);
-    const [upiId, setUpiId] = useState("");
-    const [cardNumber, setCardNumber] = useState("");
-    const [expiryDate, setExpiryDate] = useState("");
-    const [cvv, setCvv] = useState("");
     const router = useRouter();
-
-    const isValidUpi = /^[a-zA-Z0-9]+@[a-zA-Z]+$/.test(upiId);
-    const isValidCard = /^\d{16}$/.test(cardNumber) && /^\d{2}\/\d{2}$/.test(expiryDate) && /^\d{3}$/.test(cvv);
-
-    const isButtonDisabled = 
-        (activeOption === "upi" && !isValidUpi) || 
-        (activeOption === "card" && !isValidCard);
 
     const handleContinue = () => {
         setModal(true);
@@ -33,17 +35,113 @@ export default function PaymentMethod() {
                     headers: {
                         "Content-Type": "application/json",
                     },
-                    body: JSON.stringify({ paymentMethod: activeOption }),
+                    body: JSON.stringify({ paymentMethod: activeOption, razorpayOrderId: null }),
                 });
     
                 if (response.ok) {
-                    alert("Order placed successfully!");
+                    toast.success("Order placed successfully!");
                     setModal(false);
-                 //   const id = response.allOrderDetails._id;
-                 //   router.push(`/user/orders/${id}`);
-                 router.push('/user/orders');
+                    const order = await response.json();
+                    const id = order.allOrderDetails._id;
+                    router.push(`/user/order/${id}`);
                 } else {
-                    alert("Failed to place order. Try again.");
+                    toast.error("Failed to place order. Try again.");
+                }
+            }
+            else if(activeOption === "upi" || activeOption === "card"){
+                const res = await fetch("/api/proxy/user/cart", {
+                    method: "GET",
+                    credentials: "include"
+                });
+    
+                if (!res.ok) {
+                    const errorText = await res.text();
+                    setError(errorText);
+                    return;
+                }
+    
+                const data = await res.json();
+
+                const response = await fetch("/api/proxy/user/payment/create", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    credentials: "include",
+                    body: JSON.stringify({ amount: data.userCart.totalCost, currency: "INR" }) // Amount in paise
+                });
+
+                const orderData = await response.json();
+
+                if (response.ok && orderData?.id) {
+                    const razorpayLoaded = await loadRazorpayScript();
+
+                    if (!razorpayLoaded) {
+                        toast.error("Failed to load Razorpay SDK.");
+                        return;
+                    }
+                    const options = {
+                        key: orderData.key, // Razorpay key_id from server
+                        amount: orderData.amount,
+                        currency: orderData.currency,
+                        name: "Ecommerce Store",
+                        description: "Order Payment",
+                        order_id: orderData.id,
+                        prefill: {
+                            email: "user@example.com",
+                            contact: "9999999999",
+                        },
+                        theme: {
+                            color: "#4A90E2"
+                        },
+                        handler: async function (response) {
+                            // Send razorpay_payment_id, razorpay_order_id, and razorpay_signature to backend
+                            const verifyRes = await fetch("/api/proxy/user/payment/verify", {
+                                method: "POST",
+                                headers: {
+                                    "Content-Type": "application/json"
+                                },
+                                credentials: "include",
+                                body: JSON.stringify(response)
+                            });
+
+                            if (verifyRes.ok) {
+                                const razorpayDetails = await verifyRes.json();
+                                
+                                toast.success("Payment successful!");
+                                const resp = await fetch("/api/proxy/user/order", {
+                                    method: "POST",
+                                    credentials: "include",
+                                    headers: {
+                                        "Content-Type": "application/json",
+                                    },
+                                    body: JSON.stringify({ paymentMethod: activeOption, razorpayOrderId: razorpayDetails.payment.razorpay_order_id }),
+                                });
+                    
+                                if (resp.ok) {
+                                    toast.success("Order placed successfully!");
+                                    setModal(false);
+                                    const order = await resp.json();
+                                    const id = order.allOrderDetails._id;
+                                    router.push(`/user/order/${id}`);
+                                } else {
+                                    toast.error("Failed to place order. Try again.");
+                                }
+                            } else {
+                                toast.error("Payment verification failed.");
+                            }
+                        },
+                        modal: {
+                            ondismiss: function () {
+                                toast("Payment cancelled.", { icon: "❌" });
+                            }
+                        }
+                    };
+            
+                    const rzp = new window.Razorpay(options);
+                    rzp.open();
+                } else {
+                    toast.error("Failed to create Razorpay order.");
                 }
             }
         } catch (error) {
@@ -106,22 +204,6 @@ export default function PaymentMethod() {
                     />
                     <span>UPI (Pay via any app)</span>
                 </label>
-
-                {activeOption === "upi" && (
-                    <div className="mt-3">
-                        <label className="block text-sm font-medium text-gray-700">Enter your UPI ID:</label>
-                        <input 
-                            type="text" 
-                            placeholder="e.g. user@upi"
-                            value={upiId}
-                            onChange={(e) => setUpiId(e.target.value)}
-                            className="mt-1 block w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        />
-                        {!isValidUpi && upiId && (
-                            <p className="text-red-500 text-sm">Invalid UPI ID</p>
-                        )}
-                    </div>
-                )}
             </div>
 
             {/* Credit/Debit Card */}
@@ -135,54 +217,12 @@ export default function PaymentMethod() {
                     />
                     <span>Credit/Debit Card</span>
                 </label>
-
-                {activeOption === "card" && (
-                    <div className="mt-3 space-y-2">
-                        <label className="block text-sm font-medium text-gray-700">Card Number:</label>
-                        <input 
-                            type="text" 
-                            placeholder="1234 5678 9012 3456"
-                            value={cardNumber}
-                            onChange={(e) => setCardNumber(e.target.value)}
-                            className="block w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        />
-                        {!/^\d{16}$/.test(cardNumber) && cardNumber && (
-                            <p className="text-red-500 text-sm">Invalid Card Number</p>
-                        )}
-
-                        <label className="block text-sm font-medium text-gray-700">Expiry Date:</label>
-                        <input 
-                            type="text" 
-                            placeholder="MM/YY"
-                            value={expiryDate}
-                            onChange={(e) => setExpiryDate(e.target.value)}
-                            className="block w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        />
-                        {!/^\d{2}\/\d{2}$/.test(expiryDate) && expiryDate && (
-                            <p className="text-red-500 text-sm">Invalid Expiry Date</p>
-                        )}
-
-                        <label className="block text-sm font-medium text-gray-700">CVV:</label>
-                        <input 
-                            type="password" 
-                            placeholder="***"
-                            value={cvv}
-                            onChange={(e) => setCvv(e.target.value)}
-                            className="block w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        />
-                        {!/^\d{3}$/.test(cvv) && cvv && (
-                            <p className="text-red-500 text-sm">Invalid CVV</p>
-                        )}
-                    </div>
-                )}
             </div>
 
             {/* Continue Button */}
             <button 
                 onClick={handleContinue} 
-                disabled={isButtonDisabled}
-                className={`w-full mt-4 py-2 rounded-lg font-semibold transition-all shadow-md 
-                    ${isButtonDisabled ? "bg-gray-400 cursor-not-allowed" : "bg-blue-600 text-white hover:bg-blue-700 focus:ring-2 focus:ring-blue-500"}`}
+                className={`w-full mt-4 py-2 rounded-lg font-semibold transition-all shadow-md bg-blue-600 text-white hover:bg-blue-700 focus:ring-2 focus:ring-blue-500`}
             >
                 Continue
             </button>

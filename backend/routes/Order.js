@@ -13,12 +13,9 @@ const isValidObjectId = (id) => mongoose.Types.ObjectId.isValid(id);
 
 //Router for placing an order
 router.post('/', CartToOrder, asyncHandler(async (req,res) =>{
-    const {paymentMethod} = req.body;
-    console.log(paymentMethod);
+    const {paymentMethod, razorpayOrderId} = req.body;
 
-    if(paymentMethod != "cod" && paymentMethod != "recommended"){
-        const { razorpayOrderId } = req.body;
-
+    if(paymentMethod == "upi" || paymentMethod == "card"){
         // Check if the payment is verified
         const payment = await Payment.findOne({ razorpay_order_id: razorpayOrderId, status: "paid" });
         if (!payment) {
@@ -51,7 +48,9 @@ router.post('/', CartToOrder, asyncHandler(async (req,res) =>{
 
 //Router for getting all orders for a user
 router.get('/', asyncHandler(async (req,res)=>{
-    const orderDetails = await Order.find({customer: req.user.id}).populate('products.product');
+    const orderDetails = await Order.find({customer: req.user.id})
+                                    .populate('products.product')
+                                    .sort({ createdAt: -1 });
     if(!orderDetails){
         return res.status(200).send("No orders present. Do some shopping!");
     }
@@ -66,10 +65,10 @@ router.get('/:id', asyncHandler(async (req,res)=>{
     if(!isValidObjectId(orderId)){
         return res.status(400).send("Invalid product ID!");
     }
-    const orderExist = await Order.findById(orderId);
-    if(!orderExist) return res.status(404).send("No such order exists!");
+    const order = await Order.findById(orderId).populate('products.product');
+    if(!order) return res.status(404).send("No such order exists!");
 
-    res.status(200).send(orderExist);
+    res.status(200).json({order});
 }));
 
 //Route for cancelling an order for a user
