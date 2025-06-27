@@ -4,7 +4,8 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "nodemon index.js"
+    "start": "node index.js",
+    "dev": "nodemon index.js"
   },
   "keywords": [],
   "author": "",
@@ -22,11 +23,13 @@
     "jsonwebtoken": "^9.0.2",
     "latest": "^0.2.0",
     "mongoose": "^8.9.5",
-    "nodemon": "^3.1.9",
     "razorpay": "^2.9.5"
   },
   "engines": {
     "node": "20.x",
     "npm": "9.x"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.10"
   }
 }
