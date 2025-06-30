@@ -51,7 +51,7 @@ export default function Register(){
             }
     
             await res.json();
-            router.push(`${process.env.NEXT_PUBLIC_BASE_URL}/user`);
+            router.push(`${process.env.NEXT_PUBLIC_BASE_URL}/user/home`);
         } catch (err) {
             console.error("Error during registration:", err.message);
         }
