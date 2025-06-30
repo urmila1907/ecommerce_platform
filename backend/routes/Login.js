@@ -22,7 +22,7 @@ router.post('/', async (req,res)=>{
             secure: process.env.NODE_ENV === 'production', // HTTPS only in production
             sameSite: 'none',
             maxAge: 3600000, // 1 hour in milliseconds
-            path: "/user",
+            path: "/",
         });
         res.cookie("refreshToken", refreshToken, {
             httpOnly: true,
