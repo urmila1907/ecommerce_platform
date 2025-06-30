@@ -13,8 +13,8 @@ router.post('/', async (req, res) => {
         const newUser = new User({ userName, password: hashedPassword, email, phoneNum, name });
         await newUser.save();
 
-        const token = jwt.sign({id: user.id, role: user.role}, process.env.JWT_SECRET, {expiresIn: "1h"});
-        const refreshToken = jwt.sign({ id: user.id, role: user.role }, process.env.REFRESH_SECRET, { expiresIn: "7d" });
+        const token = jwt.sign({id: newUser.id, role: newUser.role}, process.env.JWT_SECRET, {expiresIn: "1h"});
+        const refreshToken = jwt.sign({ id: newUser.id, role: newUser.role }, process.env.REFRESH_SECRET, { expiresIn: "7d" });
 
         res.cookie("authToken", token, {
             httpOnly: true, // Prevents JavaScript access
