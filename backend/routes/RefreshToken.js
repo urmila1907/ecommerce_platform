@@ -28,14 +28,14 @@ router.get('/', async (req, res) => {
         res.cookie("authToken", newAccessToken, {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
-            sameSite: 'lax',
+            sameSite: 'none',
             maxAge: 3600000, // 1 hour,
-            path: "/"
+            path: "/user",
         });
         res.cookie("refreshToken", newRefreshToken, {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
-            sameSite: 'lax',
+            sameSite: 'none',
             maxAge: 604800000, // 1 hour,
             path: "/"
         });
