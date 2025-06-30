@@ -30,7 +30,7 @@ router.get('/', async (req, res) => {
             secure: process.env.NODE_ENV === 'production',
             sameSite: 'none',
             maxAge: 3600000, // 1 hour,
-            path: "/user",
+            path: "/",
         });
         res.cookie("refreshToken", newRefreshToken, {
             httpOnly: true,
