@@ -39,7 +39,7 @@ export default function Register(){
     const handleSubmit = async (e) => {
         try {
             e.preventDefault();
-            const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/register`, {
+            const res = await fetch("api/proxy/register", {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(formData),
